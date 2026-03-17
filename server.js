@@ -136,6 +136,25 @@ app.get('/api/stats', (req, res) => {
   });
 });
 
+// ─── ADMIN: GET ALL USERS ─────────────────────────────────────────────────────
+app.get('/api/admin/users', authMiddleware, (req, res) => {
+  // Only admins can see the full user list
+  if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
+
+  try {
+    // We select everything EXCEPT passwords for security
+    const users = db.prepare(`
+      SELECT id, username, email, role, joined, banned, avatar, wins, battles_count 
+      FROM users 
+      ORDER BY id DESC
+    `).all();
+    
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
 // ─── SPA FALLBACK ───────────────────────────────────────────────────────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
