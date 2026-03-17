@@ -1088,59 +1088,30 @@ function ProfilePage({t,nav,currentUser,setCurrentUser}){
   );
 }
 
-function AdminPanel({ t, user }) {
-  const [activeTab, setActiveTab] = React.useState('overview');
-  const [userList, setUserList] = React.useState([]);
-  const [loading, setLoading] = React.useState(false);
+// ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+function AdminPanel({t,nav,currentUser,settings,setSettings}){
+  const [tab,setTab]=useState('overview');
+  const [stats,setStats]=useState({});
+  const [users,setUsers]=useState([]);
+  const [battles,setBattles]=useState([]);
+  const [news,setNews]=useState([]);
+  const [reports,setReports]=useState([]);
+  const [rappers,setRappers]=useState([]);
+  const [msg,setMsg]=useState('');
+  const [newBattle,setNewBattle]=useState({title:'',rapper1:'',rapper2:'',round:'Round 1',status:'upcoming'});
+  const [newArticle,setNewArticle]=useState({title_en:'',title_ka:'',excerpt_en:'',excerpt_ka:'',category:'Battle News'});
 
-  React.useEffect(() => {
-    if (activeTab === 'users') {
-      setLoading(true);
-      // This uses your existing 'api' helper function from the top of the script
-      api('GET', '/admin/users')
-        .then(data => {
-          setUserList(data);
-          setLoading(false);
-        })
-        .catch(err => {
-          console.error("Admin fetch error:", err);
-          setLoading(false);
-        });
-    }
-  }, [activeTab]);
+  const showMsg=(m)=>{setMsg(m);setTimeout(()=>setMsg(''),3000);};
 
-  return React.createElement('div', { className: 'container page' },
-    React.createElement('div', { className: 'section-header' },
-      React.createElement('div', { className: 'accent-bar' }),
-      React.createElement('h2', null, t.adminPanel)
-    ),
-    React.createElement('div', { className: 'tabs' },
-      React.createElement('button', { className: `tab ${activeTab === 'overview' ? 'active' : ''}`, onClick: () => setActiveTab('overview') }, t.overview),
-      React.createElement('button', { className: `tab ${activeTab === 'users' ? 'active' : ''}`, onClick: () => setActiveTab('users') }, t.users)
-    ),
-    activeTab === 'users' && React.createElement('div', { className: 'card' },
-      loading ? React.createElement('div', { className: 'spinner' }) :
-      React.createElement('table', null,
-        React.createElement('thead', null,
-          React.createElement('tr', null,
-            React.createElement('th', null, t.username),
-            React.createElement('th', null, t.email),
-            React.createElement('th', null, t.role),
-            React.createElement('th', null, 'Status')
-          )
-        ),
-        React.createElement('tbody', null,
-          userList.map(u => React.createElement('tr', { key: u.id },
-            React.createElement('td', null, u.username),
-            React.createElement('td', null, u.email || '—'),
-            React.createElement('td', null, React.createElement(RoleBadge, { role: u.role })),
-            React.createElement('td', null, u.banned ? 'Banned' : 'Active')
-          ))
-        )
-      )
-    )
-  );
-}
+  useEffect(()=>{
+    GET('/stats').then(setStats).catch(()=>{});
+    GET('/users').then(setUsers).catch(()=>{});
+    GET('/battles').then(setBattles).catch(()=>{});
+    GET('/news').then(setNews).catch(()=>{});
+    GET('/reports').then(setReports).catch(()=>{});
+    GET('/rappers').then(setRappers).catch(()=>{});
+  },[]);
+
   const banUser=async(id,banned)=>{await PUT('/users/'+id,{banned:!banned});setUsers(us=>us.map(u=>u.id===id?{...u,banned:!u.banned}:u));showMsg('Updated');};
   const deleteUser=async(id)=>{if(id===1){showMsg('Cannot delete super admin');return;}if(!confirm('Delete user?'))return;await DEL('/users/'+id);setUsers(us=>us.filter(u=>u.id!==id));showMsg('Deleted');};
   const changeRole=async(id,role)=>{await PUT('/users/'+id,{role});setUsers(us=>us.map(u=>u.id===id?{...u,role}:u));showMsg('Role updated');};
