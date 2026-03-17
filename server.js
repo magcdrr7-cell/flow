@@ -9,7 +9,7 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'flowbars-ultra-secret-key-change-me-in-production-2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'flowbars';
 const ADMIN_IP = process.env.ADMIN_IP || '176.74.94.221';
 
 // ─── RAILWAY PROXY FIX ────────────────────────────────────────────────────────
@@ -107,9 +107,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // This fixes your ERR_ERL_PERMISSIVE_TRUST_PROXY error
 const limiter = rateLimit({ 
-  windowMs: 15 * 60 * 1000, 
-  max: 1000,
-  validate: { trustProxy: false } 
+    windowMs: 15 * 60 * 1000, 
+    max: 500, 
+    standardHeaders: true, 
+    legacyHeaders: false,
+    // ADD THIS LINE TO FIX THE CRASH
+    validate: { trustProxy: false } 
 });
 app.use('/api', limiter);
 
