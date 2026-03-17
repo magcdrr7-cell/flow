@@ -255,6 +255,28 @@ app.post('/api/battles',auth,adminOnly,(req,res)=>{
 });
 app.put('/api/battles/:id',auth,adminOnly,(req,res)=>{
   const {title,status,round,winner,featured,rapper1,rapper2,rapper1_id,rapper2_id}=req.body;
+
+  // If winner is being set, update rapper stats (only once — check previous winner)
+  if(winner){
+    const battle=db.prepare('SELECT * FROM battles WHERE id=?').get(req.params.id);
+    const prevWinner=battle?.winner;
+
+    // Only apply if winner is new (not already set to same value)
+    if(prevWinner!==winner){
+      // Undo previous winner stats if winner is being changed
+      if(prevWinner){
+        const prevLoser=battle.rapper1===prevWinner?battle.rapper2:battle.rapper1;
+        db.prepare('UPDATE rappers SET wins=MAX(0,wins-1),pts=MAX(0,pts-100) WHERE username=?').run(prevWinner);
+        db.prepare('UPDATE rappers SET losses=MAX(0,losses-1),pts=MAX(0,pts-10) WHERE username=?').run(prevLoser);
+      }
+
+      // Apply new winner stats
+      const loser=req.body.rapper1===winner?(req.body.rapper2||battle.rapper2):(req.body.rapper1||battle.rapper1);
+      db.prepare('UPDATE rappers SET wins=wins+1, pts=pts+100 WHERE username=?').run(winner);
+      db.prepare('UPDATE rappers SET losses=losses+1, pts=pts+10 WHERE username=?').run(loser);
+    }
+  }
+
   db.prepare(`UPDATE battles SET title=COALESCE(?,title),status=COALESCE(?,status),round=COALESCE(?,round),winner=COALESCE(?,winner),featured=COALESCE(?,featured),rapper1=COALESCE(?,rapper1),rapper2=COALESCE(?,rapper2),rapper1_id=COALESCE(?,rapper1_id),rapper2_id=COALESCE(?,rapper2_id) WHERE id=?`)
     .run(title??null,status??null,round??null,winner??null,featured!==undefined?(featured?1:0):null,rapper1??null,rapper2??null,rapper1_id??null,rapper2_id??null,req.params.id);
   res.json({success:true});
