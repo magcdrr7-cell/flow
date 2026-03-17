@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Flow & Bars</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+<style id="design-vars">
+:root{
+  --red:#FF2D55;--red2:#cc1f42;
+  --cyan:#00D4FF;--gold:#FFD700;--orange:#FF6B2B;--purple:#B44FFF;
+  --green:#00FF87;
+  --bg:#070707;--bg2:#0d0d0d;--bg3:#111;--bg4:#161616;--bg5:#1c1c1c;
+  --border:#222;--border2:#2a2a2a;
+  --text:#e8e8e8;--text2:#aaa;--text3:#666;
+  --font-display:'Bebas Neue',cursive;
+  --font-ui:'Rajdhani',sans-serif;
+  --font-mono:'Share Tech Mono',monospace;
+}
+</style>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:15px;line-height:1.5;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px}
+a{color:inherit;text-decoration:none}button{cursor:pointer;font-family:var(--font-ui)}input,select,textarea{font-family:var(--font-ui)}
+
+@keyframes rainbow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes livePulse{0%,100%{box-shadow:0 0 0 0 rgba(255,45,85,.6)}70%{box-shadow:0 0 0 8px rgba(255,45,85,0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes designGlow{0%,100%{box-shadow:0 0 0 2px rgba(255,215,0,.4)}50%{box-shadow:0 0 0 3px rgba(255,215,0,.9),0 0 16px rgba(255,215,0,.3)}}
+@keyframes slideInRight{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+
+.admin-badge{background:linear-gradient(90deg,#f00,#f70,#ff0,#0f0,#00f,#8b00ff,#f00);background-size:400% 400%;animation:rainbow 2s linear infinite;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;-webkit-text-fill-color:#fff;letter-spacing:1px;box-shadow:0 0 12px rgba(255,200,100,.5)}
+.mod-badge{background:#FF6B2B;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;letter-spacing:1px}
+.designer-badge{background:#B44FFF;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;letter-spacing:1px}
+.judge-badge{background:#FFD700;border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#000;letter-spacing:1px}
+.battler-badge{background:var(--red);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#fff;letter-spacing:1px}
+.user-badge-r{background:var(--cyan);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:700;color:#000;letter-spacing:1px}
+
+#app{min-height:100vh;display:flex;flex-direction:column}
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(7,7,7,.95);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);height:60px;display:flex;align-items:center;padding:0 20px;gap:12px}
+.nav-logo{font-family:var(--font-display);font-size:28px;letter-spacing:2px;background:linear-gradient(135deg,var(--red),#ff6b6b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;cursor:pointer;flex-shrink:0}
+.nav-links{display:flex;gap:4px;flex:1;overflow-x:auto;scrollbar-width:none}
+.nav-links::-webkit-scrollbar{display:none}
+.nav-btn{background:none;border:none;color:var(--text2);font-family:var(--font-ui);font-size:13px;font-weight:600;padding:6px 10px;border-radius:4px;transition:all .2s;white-space:nowrap;letter-spacing:.5px;text-transform:uppercase}
+.nav-btn:hover,.nav-btn.active{color:var(--text);background:var(--bg4)}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.lang-btn{background:var(--bg4);border:1px solid var(--border);color:var(--text2);font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;letter-spacing:1px;transition:all .2s}
+.lang-btn:hover{border-color:var(--red);color:var(--red)}
+.btn-primary{background:var(--red);border:none;color:#fff;font-family:var(--font-ui);font-size:13px;font-weight:700;padding:8px 18px;border-radius:4px;letter-spacing:.5px;transition:all .2s;text-transform:uppercase}
+.btn-primary:hover{background:var(--red2);transform:translateY(-1px)}
+.btn-outline{background:none;border:1px solid var(--border2);color:var(--text2);font-family:var(--font-ui);font-size:13px;font-weight:600;padding:8px 18px;border-radius:4px;letter-spacing:.5px;transition:all .2s;text-transform:uppercase}
+.btn-outline:hover{border-color:var(--red);color:var(--red)}
+.btn-sm{padding:5px 12px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px}
+.btn-danger{background:#c0392b;border:none;color:#fff;font-family:var(--font-ui);font-size:13px;font-weight:700;padding:8px 18px;border-radius:4px;transition:all .2s;text-transform:uppercase}
+.btn-danger:hover{background:#a93226}
+.btn-success{background:#27ae60;border:none;color:#fff;font-family:var(--font-ui);font-size:13px;font-weight:700;padding:8px 18px;border-radius:4px;transition:all .2s}
+.btn-gold{background:var(--gold);border:none;color:#000;font-family:var(--font-ui);font-size:13px;font-weight:700;padding:8px 18px;border-radius:4px;transition:all .2s}
+
+main{flex:1;padding-top:60px}
+.container{max-width:1200px;margin:0 auto;padding:0 20px}
+.page{animation:fadeIn .3s ease}
+.card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .2s}
+.card:hover{border-color:var(--border2)}
+.input-field{background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:14px;padding:10px 14px;border-radius:6px;width:100%;transition:border-color .2s;outline:none}
+.input-field:focus{border-color:var(--red)}
+.input-field::placeholder{color:var(--text3)}
+select.input-field option{background:var(--bg4)}
+label{display:block;font-size:12px;font-weight:700;letter-spacing:.5px;color:var(--text2);margin-bottom:6px;text-transform:uppercase}
+.form-group{margin-bottom:16px}
+.section-header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.section-header h2{font-family:var(--font-display);font-size:32px;letter-spacing:2px}
+.accent-bar{width:4px;height:32px;background:var(--red);border-radius:2px;flex-shrink:0}
+.live-badge{background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase;animation:livePulse 1.5s infinite}
+.upcoming-badge{background:var(--gold);color:#000;font-size:10px;font-weight:700;padding:3px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+.finished-badge{background:var(--bg5);color:var(--text3);font-size:10px;font-weight:700;padding:3px 7px;border-radius:3px;letter-spacing:1px;text-transform:uppercase}
+.divider{height:1px;background:var(--border);margin:20px 0}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:flex;align-items:center;justify-content:center;padding:20px;animation:fadeIn .2s}
+.modal{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;padding:28px;max-width:500px;width:100%;max-height:80vh;overflow-y:auto;animation:slideDown .3s}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:24px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{background:none;border:none;color:var(--text3);font-family:var(--font-ui);font-size:13px;font-weight:600;padding:10px 16px;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}.tab:hover{color:var(--text)}
+.stat-box{background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:16px;text-align:center}
+.stat-num{font-family:var(--font-display);font-size:40px;letter-spacing:1px;line-height:1}
+.stat-label{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg4);color:var(--text2);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.flex-between{display:flex;align-items:center;justify-content:space-between}
+.flex-center{display:flex;align-items:center}
+.gap-8{gap:8px}.gap-12{gap:12px}
+.mt-8{margin-top:8px}.mt-16{margin-top:16px}.mb-16{margin-bottom:16px}
+.scroll-x{overflow-x:auto;scrollbar-width:thin}
+.search-box{position:relative}.search-box .input-field{padding-left:36px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px}
+.empty-state{text-align:center;padding:60px 20px;color:var(--text3)}
+.empty-state h3{font-family:var(--font-display);font-size:28px;letter-spacing:2px;margin-bottom:8px;color:var(--text2)}
+
+.hero{position:relative;background:linear-gradient(180deg,#0a0a0a 0%,var(--bg) 100%);padding:60px 0;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 50%,rgba(255,45,85,.08),transparent 60%),radial-gradient(ellipse at 80% 50%,rgba(0,212,255,.05),transparent 60%);pointer-events:none}
+.hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.hero-title{font-family:var(--font-display);font-size:72px;line-height:.95;letter-spacing:3px;text-transform:uppercase}
+.hero-sub{color:var(--text2);font-size:16px;margin-top:16px;line-height:1.6}
+.hero-actions{display:flex;gap:12px;margin-top:28px}
+.stats-bar{background:var(--bg3);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;margin-bottom:48px}
+.stats-bar-inner{display:flex;justify-content:space-around;align-items:center}
+.stat-item{text-align:center}
+.stat-item .num{font-family:var(--font-display);font-size:28px;color:var(--red)}
+.stat-item .lbl{font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase}
+.battle-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .25s}
+.battle-card:hover{border-color:var(--red);transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,45,85,.1)}
+.battle-card-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.battle-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;padding:16px}
+.rapper-side{text-align:center}
+.rapper-avatar{width:60px;height:60px;border-radius:50%;background:var(--bg5);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 8px}
+.rapper-name{font-family:var(--font-display);font-size:18px;letter-spacing:1px}
+.vs-text{font-family:var(--font-display);font-size:28px;color:var(--text3);letter-spacing:2px}
+.vote-bar-wrap{padding:0 16px 14px}
+.vote-bar{height:6px;background:var(--bg5);border-radius:3px;overflow:hidden;display:flex}
+.vote-bar-a{background:var(--red);transition:width .5s}.vote-bar-b{background:var(--cyan);transition:width .5s}
+.vote-pct{display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:11px;color:var(--text3);margin-bottom:6px}
+.rapper-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:20px;cursor:pointer;transition:all .25s;text-align:center}
+.rapper-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.rapper-big-avatar{width:80px;height:80px;border-radius:50%;background:var(--bg5);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 12px}
+.rapper-stats-row{display:flex;justify-content:center;gap:16px;margin-top:12px}
+.mini-stat{text-align:center}.mini-stat .v{font-family:var(--font-display);font-size:20px}.mini-stat .l{font-size:10px;color:var(--text3);letter-spacing:.5px;text-transform:uppercase}
+.news-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all .25s}
+.news-card:hover{border-color:var(--border2)}
+.news-img{height:160px;background:linear-gradient(135deg,#1a0a0e,#0a0a1a);display:flex;align-items:center;justify-content:center;font-size:40px}
+.news-body{padding:16px}
+.news-cat{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--red);margin-bottom:6px}
+.news-title{font-family:var(--font-display);font-size:20px;letter-spacing:1px;line-height:1.2;margin-bottom:8px}
+.news-excerpt{font-size:13px;color:var(--text2);line-height:1.5}
+.news-meta{font-size:11px;color:var(--text3);margin-top:10px;display:flex;gap:8px}
+.podium{display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-bottom:40px}
+.podium-item{text-align:center;flex:1;max-width:160px}
+.podium-block{border-radius:8px 8px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:16px 8px;cursor:pointer;transition:opacity .2s}
+.podium-block:hover{opacity:.85}
+.p1{background:linear-gradient(180deg,rgba(255,215,0,.2),rgba(255,215,0,.05));border:1px solid rgba(255,215,0,.4);height:120px}
+.p2{background:linear-gradient(180deg,rgba(192,192,192,.15),rgba(192,192,192,.03));border:1px solid rgba(192,192,192,.3);height:90px}
+.p3{background:linear-gradient(180deg,rgba(205,127,50,.15),rgba(205,127,50,.03));border:1px solid rgba(205,127,50,.3);height:70px}
+.podium-name{font-family:var(--font-display);font-size:14px;letter-spacing:1px;margin-top:10px}
+.podium-pts{font-family:var(--font-mono);font-size:12px;color:var(--text2)}
+.chat-wrap{display:grid;grid-template-columns:1fr 280px;gap:20px;height:calc(100vh - 140px)}
+.chat-main{display:flex;flex-direction:column;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.chat-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{display:flex;gap:10px;align-items:flex-start;animation:slideDown .2s}
+.chat-avatar{width:32px;height:32px;border-radius:50%;background:var(--bg5);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.chat-content{flex:1}
+.chat-author{font-size:12px;font-weight:700;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.chat-text{font-size:13px;color:var(--text);background:var(--bg4);padding:8px 12px;border-radius:0 8px 8px 8px;display:inline-block;max-width:100%;line-height:1.5}
+.chat-time{font-size:10px;color:var(--text3);margin-top:3px}
+.chat-input-row{padding:12px;border-top:1px solid var(--border);display:flex;gap:8px}
+.online-list{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px}
+.online-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)}
+.online-item:last-child{border-bottom:none}
+.online-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);flex-shrink:0}
+.typing-dot{width:6px;height:6px;border-radius:50%;background:var(--text3);animation:pulse 1.4s infinite;display:inline-block}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+.admin-header{position:relative;padding:28px 0;margin-bottom:0;background:linear-gradient(135deg,#0d0309,#07070d)}
+.admin-header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#f00,#f70,#ff0,#0f0,#00f,#8b00ff,#f00);background-size:400% 100%;animation:rainbow 2s linear infinite}
+.overview-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px}
+.profile-header{background:linear-gradient(180deg,var(--bg3),var(--bg));border:1px solid var(--border);border-radius:12px;padding:32px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;margin-bottom:24px}
+.profile-avatar{width:100px;height:100px;border-radius:50%;background:var(--bg5);border:3px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:40px}
+footer{background:var(--bg3);border-top:1px solid var(--border);padding:32px 0;margin-top:60px}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:var(--font-display);font-size:24px;color:var(--text3)}
+.footer-link{color:var(--text3);font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:color .2s}
+.footer-link:hover{color:var(--red)}
+.toggle{position:relative;width:44px;height:24px;cursor:pointer;display:inline-block}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--bg5);border:1px solid var(--border);border-radius:12px;transition:.3s}
+.slider::before{content:'';position:absolute;width:18px;height:18px;bottom:2px;left:2px;background:var(--text3);border-radius:50%;transition:.3s}
+.toggle input:checked+.slider{background:rgba(255,45,85,.3);border-color:var(--red)}
+.toggle input:checked+.slider::before{transform:translateX(20px);background:var(--red)}
+.maintenance{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+.maintenance h1{font-family:var(--font-display);font-size:60px;letter-spacing:4px;color:var(--red)}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--red);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ─── DESIGN MODE ─────────────────────────────────────────────── */
+body.design-mode [data-editable]{outline:1px dashed rgba(255,215,0,.35);cursor:text;transition:outline .2s}
+body.design-mode [data-editable]:hover{outline:2px solid var(--gold);animation:designGlow 2s infinite}
+body.design-mode [data-editable]:focus{outline:2px solid var(--gold);background:rgba(255,215,0,.04);box-shadow:0 0 0 4px rgba(255,215,0,.1)}
+
+.design-fab{position:fixed;bottom:24px;right:24px;z-index:3000;background:linear-gradient(135deg,#1a0a00,#0a001a);border:2px solid var(--gold);color:var(--gold);font-family:var(--font-ui);font-size:13px;font-weight:700;padding:10px 18px;border-radius:50px;cursor:pointer;letter-spacing:1px;transition:all .25s;box-shadow:0 4px 20px rgba(255,215,0,.2)}
+.design-fab:hover,.design-fab.active{background:var(--gold);color:#000;box-shadow:0 4px 30px rgba(255,215,0,.5)}
+.design-fab.active{animation:none}
+
+.design-panel{position:fixed;top:60px;right:0;bottom:0;width:320px;background:rgba(10,8,15,.97);border-left:1px solid rgba(255,215,0,.3);z-index:2500;display:flex;flex-direction:column;animation:slideInRight .3s;backdrop-filter:blur(12px);overflow:hidden}
+.design-panel-header{padding:16px;border-bottom:1px solid rgba(255,215,0,.2);display:flex;align-items:center;justify-content:space-between}
+.design-panel-title{font-family:var(--font-display);font-size:20px;letterSpacing:2px;color:var(--gold)}
+.design-panel-body{flex:1;overflow-y:auto;padding:16px}
+.design-panel-body::-webkit-scrollbar{width:3px}
+.design-panel-body::-webkit-scrollbar-thumb{background:var(--gold)}
+.design-section{margin-bottom:20px}
+.design-section-title{font-size:11px;font-weight:700;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;padding-bottom:6px;border-bottom:1px solid rgba(255,215,0,.15)}
+.design-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.design-label{font-size:12px;color:var(--text2)}
+.color-input-wrap{position:relative;width:40px;height:28px;border-radius:4px;overflow:hidden;border:1px solid var(--border2);cursor:pointer}
+.color-input-wrap input[type=color]{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);border:none;padding:0;cursor:pointer;opacity:0}
+.color-swatch{position:absolute;inset:0;border-radius:3px;pointer-events:none}
+.design-input{background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:12px;padding:6px 10px;border-radius:4px;width:100%;outline:none;transition:border-color .2s}
+.design-input:focus{border-color:var(--gold)}
+.design-textarea{background:var(--bg4);border:1px solid var(--border);color:var(--text);font-family:var(--font-ui);font-size:12px;padding:8px 10px;border-radius:4px;width:100%;outline:none;resize:vertical;min-height:80px}
+.design-textarea:focus{border-color:var(--gold)}
+.design-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0}
+.design-tabs{display:flex;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none}
+.design-tab{background:none;border:none;color:var(--text3);font-family:var(--font-ui);font-size:11px;font-weight:700;padding:6px 10px;border-bottom:2px solid transparent;cursor:pointer;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;transition:all .2s}
+.design-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.design-panel-footer{padding:12px 16px;border-top:1px solid rgba(255,215,0,.2);display:flex;gap:8px}
+.btn-save-design{background:var(--gold);border:none;color:#000;font-family:var(--font-ui);font-size:13px;font-weight:700;padding:10px;border-radius:6px;flex:1;cursor:pointer;letter-spacing:.5px;transition:all .2s}
+.btn-save-design:hover{background:#e6c200;transform:translateY(-1px)}
+.design-success{font-size:11px;color:var(--green);text-align:center;margin-top:4px}
+
+@media(max-width:768px){
+  .hero-grid,.grid-2,.grid-3,.grid-4,.overview-grid,.chat-wrap{grid-template-columns:1fr}
+  .hero-title{font-size:48px}
+  .profile-header{grid-template-columns:1fr;text-align:center}
+  .design-panel{width:100%;top:60px}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script>
+'use strict';
+const {useState,useEffect,useRef,useCallback}=React;
+const API = '';
+
+// ─── API HELPERS ─────────────────────────────────────────────────────────────
+function getToken(){return localStorage.getItem('fb_token');}
+function setToken(t){if(t)localStorage.setItem('fb_token',t);else localStorage.removeItem('fb_token');}
+
+async function api(method,path,body){
+  const opts={method,headers:{'Content-Type':'application/json'}};
+  const token=getToken();
+  if(token) opts.headers['Authorization']='Bearer '+token;
+  if(body) opts.body=JSON.stringify(body);
+  const r=await fetch(API+'/api'+path,opts);
+  const data=await r.json();
+  if(!r.ok) throw new Error(data.error||'Request failed');
+  return data;
+}
+const GET=(path)=>api('GET',path);
+const POST=(path,body)=>api('POST',path,body);
+const PUT=(path,body)=>api('PUT',path,body);
+const DEL=(path)=>api('DELETE',path);
+
+// ─── TRANSLATIONS ─────────────────────────────────────────────────────────────
+const T={
+  en:{home:'Home',battles:'Battles',rappers:'Rappers',leaderboard:'Leaderboard',chat:'Chat',news:'News',login:'Login',register:'Register',logout:'Logout',profile:'Profile',adminPanel:'Admin',modPanel:'Mod Panel',designerPanel:'Designer',judgePanel:'Judge',viewAll:'View All',voteLive:'Vote Now',voted:'Voted ✓',topRappers:'Top Rappers',latestNews:'Latest News',liveNow:'LIVE NOW',upcoming:'UPCOMING',finished:'FINISHED',versus:'VS',wins:'Wins',losses:'Losses',pts:'PTS',follow:'Follow',unfollow:'Unfollow',following:'Following',allBattles:'All',liveBattles:'Live',upcomingBattles:'Upcoming',finishedBattles:'Finished',chatTitle:'Community Chat',onlineUsers:'Online',typeMsg:'Type a message...',send:'Send',chatDisabled:'Chat is currently disabled.',settings:'Settings',users:'Users',reports:'Reports',banUser:'Ban',unbanUser:'Unban',deleteUser:'Delete',resolve:'Resolve',maintenance:'🔧 Under Maintenance',maintenanceMsg:'Platform is temporarily down for maintenance.',saveChanges:'Save Changes',delete:'Delete',addBattle:'Add Battle',addNews:'Add News',addBanner:'Add Banner',title:'Title',status:'Status',overview:'Overview',totalUsers:'Total Users',totalBattles:'Total Battles',liveBattles2:'Live Battles',totalNews:'Total News',pendingReports:'Pending Reports',bannedUsers:'Banned Users',totalVotes:'Total Votes',totalViews:'Total Views',email:'Email',password:'Password',username:'Username',bio:'Bio',role:'Role',noAccount:"No account?",hasAccount:'Have an account?',comments:'Comments',commentPlaceholder:'Write a comment...',battleHistory:'Battle History',editProfile:'Edit Profile',followedRappers:'Followed Rappers',chatLog:'Chat Log',technique:'Technique',delivery:'Delivery',contentScore:'Content',submitScore:'Submit Score',scored:'Submitted!',banners:'Banners',gallery:'Gallery',round:'Round',registrationOpen:'Registration Open',chatEnabled:'Chat Enabled',maintenanceMode:'Maintenance Mode',dangerZone:'⚠ Danger Zone',resetPlatform:'Reset All Data',roleDistribution:'Role Distribution',articleBy:'By',noResults:'No results found.',winner:'Winner',scoreboard:'Scoreboard',designMode:'Design Mode',designPanel:'🎨 Design Editor',colors:'Colors',content:'Content',sections:'Sections',typography:'Typography',customCSS:'Custom CSS',saveDesign:'Save Design',designSaved:'Design saved!',heroTitle:'Hero Title',heroSubtitle:'Hero Subtitle',primaryColor:'Primary Color',accentColor:'Accent Color',goldColor:'Gold Color',bgColor:'Background',textColor:'Text',showHero:'Show Hero',showStats:'Show Stats',showBattles:'Show Battles',showRappers:'Show Rappers',showNews:'Show News',rappers:'Rappers'},
+  ka:{home:'მთავარი',battles:'ბეთლები',rappers:'რეპერები',leaderboard:'ლიდერბორდი',chat:'ჩათი',news:'სიახლეები',login:'შესვლა',register:'რეგისტრაცია',logout:'გასვლა',profile:'პროფილი',adminPanel:'ადმინი',modPanel:'მოდ',designerPanel:'დიზაინი',judgePanel:'მოსამართლე',viewAll:'ყველა',voteLive:'ხმის მიცემა',voted:'ხმა მიეცა ✓',topRappers:'საუკეთესოები',latestNews:'სიახლეები',liveNow:'პირდაპირი',upcoming:'მოახლოებული',finished:'დასრულებული',versus:'VS',wins:'გამარჯვება',losses:'მარცხი',pts:'ქულა',follow:'გამოწერა',unfollow:'გაუქმება',following:'გამოწერილია',allBattles:'ყველა',liveBattles:'პირდაპირი',upcomingBattles:'მოახლოებული',finishedBattles:'დასრულებული',chatTitle:'საზოგადოება',onlineUsers:'ონლაინი',typeMsg:'შეიყვანე...',send:'გაგზავნა',chatDisabled:'ჩათი გათიშულია.',settings:'პარამეტრები',users:'მომხმარებლები',reports:'მოხსენებები',banUser:'დაბლოკვა',unbanUser:'განბლოკვა',deleteUser:'წაშლა',resolve:'მოგვარება',maintenance:'🔧 ტექნიკური სამუშაო',maintenanceMsg:'პლატფორმა დროებით მიუწვდომელია.',saveChanges:'შენახვა',delete:'წაშლა',addBattle:'ბეთლის დამატება',addNews:'სიახლის დამატება',addBanner:'ბანერის დამატება',title:'სათაური',status:'სტატუსი',overview:'მიმოხილვა',totalUsers:'სულ მომხმარებელი',totalBattles:'სულ ბეთლი',liveBattles2:'პირდაპირი',totalNews:'სიახლეები',pendingReports:'მოხსენებები',bannedUsers:'დაბლოკილი',totalVotes:'ხმები',totalViews:'ნახვები',email:'ელ. ფოსტა',password:'პაროლი',username:'სახელი',bio:'ბიოგრაფია',role:'როლი',noAccount:'არ გაქვს ანგარიში?',hasAccount:'გაქვს ანგარიში?',comments:'კომენტარები',commentPlaceholder:'კომენტარი...',battleHistory:'ბეთლის ისტორია',editProfile:'პროფილის რედაქტირება',followedRappers:'გამოწერილი',chatLog:'ჩათის ლოგი',technique:'ტექნიკა',delivery:'პოდაჩა',contentScore:'კონტენტი',submitScore:'ქულის შეტანა',scored:'შეტანილია!',banners:'ბანერები',gallery:'გალერეა',round:'რაუნდი',registrationOpen:'რეგისტრაცია',chatEnabled:'ჩათი',maintenanceMode:'ტექნიკური',dangerZone:'⚠ სახიფათო',resetPlatform:'გასუფთავება',roleDistribution:'განაწილება',articleBy:'ავტ.',noResults:'შედეგი ვერ მოიძებნა.',winner:'გამარჯვებული',scoreboard:'ქულები',designMode:'დიზაინ მოდი',designPanel:'🎨 დიზაინის რედაქტორი',colors:'ფერები',content:'კონტენტი',sections:'სექციები',typography:'შრიფტი',customCSS:'CSS',saveDesign:'შენახვა',designSaved:'შენახულია!',heroTitle:'სათაური',heroSubtitle:'ქვეტიტული',primaryColor:'მთავარი ფერი',accentColor:'აქცენტი',goldColor:'ოქრო',bgColor:'ფონი',textColor:'ტექსტი',showHero:'ჰეროს ჩვენება',showStats:'სტატის ჩვენება',showBattles:'ბეთლების ჩვენება',showRappers:'რეპერების ჩვენება',showNews:'სიახლეების ჩვენება',rappers:'რეპერები'}
+};
+
+const ROLE_COLORS={admin:'rainbow',moderator:'#FF6B2B',designer:'#B44FFF',judge:'#FFD700',battler:'#FF2D55',user:'#00D4FF'};
+const ROLE_LABELS={admin:'ADMIN',moderator:'MOD',designer:'DESIGNER',judge:'JUDGE',battler:'BATTLER',user:'USER'};
+
+function RoleBadge({role}){
+  if(!role) return null;
+  if(role==='admin') return React.createElement('span',{className:'admin-badge'},'ADMIN');
+  const cls={moderator:'mod-badge',designer:'designer-badge',judge:'judge-badge',battler:'battler-badge',user:'user-badge-r'}[role]||'user-badge-r';
+  return React.createElement('span',{className:cls},ROLE_LABELS[role]||role.toUpperCase());
+}
+function votePercent(v1,v2){const t=v1+v2;if(!t)return[50,50];return[Math.round(v1/t*100),Math.round(v2/t*100)];}
+function timeAgo(d){const days=Math.floor((Date.now()-new Date(d).getTime())/86400000);if(days===0)return'Today';if(days===1)return'Yesterday';return days+'d ago';}
+function getBattleStatus(status,t){
+  if(status==='live') return React.createElement('span',{className:'live-badge'},t.liveNow);
+  if(status==='upcoming') return React.createElement('span',{className:'upcoming-badge'},t.upcoming);
+  return React.createElement('span',{className:'finished-badge'},t.finished);
+}
+
+// ─── DESIGN MODE PANEL ───────────────────────────────────────────────────────
+function DesignPanel({t,onClose,onSave}){
+  const [tab,setTab]=useState('colors');
+  const [cfg,setCfg]=useState(null);
+  const [saving,setSaving]=useState(false);
+  const [saved,setSaved]=useState(false);
+
+  useEffect(()=>{
+    GET('/design').then(d=>{
+      setCfg(d);
+      applyDesign(d);
+    }).catch(()=>{});
+  },[]);
+
+  function applyDesign(d){
+    if(!d||!d.colors) return;
+    const s=document.getElementById('design-vars');
+    if(s) s.textContent=`:root{--red:${d.colors.primary||'#FF2D55'};--red2:${d.colors.primary||'#FF2D55'};--cyan:${d.colors.accent||'#00D4FF'};--gold:${d.colors.gold||'#FFD700'};--bg:${d.colors.bg||'#070707'};--text:${d.colors.text||'#e8e8e8'};--bg2:#0d0d0d;--bg3:#111;--bg4:#161616;--bg5:#1c1c1c;--border:#222;--border2:#2a2a2a;--text2:#aaa;--text3:#666;--orange:#FF6B2B;--purple:#B44FFF;--green:#00FF87;--font-display:'Bebas Neue',cursive;--font-ui:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;}${d.customCSS||''}`;
+    if(d.customCSS){const el=document.getElementById('custom-css')||Object.assign(document.createElement('style'),{id:'custom-css'});el.textContent=d.customCSS;if(!el.parentNode)document.head.appendChild(el);}
+  }
+
+  function update(path,val){
+    setCfg(prev=>{
+      const n=JSON.parse(JSON.stringify(prev));
+      const parts=path.split('.');
+      let cur=n;
+      for(let i=0;i<parts.length-1;i++) cur=cur[parts[i]];
+      cur[parts[parts.length-1]]=val;
+      applyDesign(n);
+      return n;
+    });
+  }
+
+  async function save(){
+    setSaving(true);
+    try{
+      await PUT('/design',cfg);
+      setSaved(true);setTimeout(()=>setSaved(false),2000);
+      if(onSave) onSave(cfg);
+    }catch(e){alert('Save failed: '+e.message);}
+    setSaving(false);
+  }
+
+  if(!cfg) return React.createElement('div',{className:'design-panel'},React.createElement('div',{style:{padding:24,textAlign:'center',color:'var(--text3)'}},React.createElement('div',{className:'spinner'})));
+
+  const TABS=[['colors',t.colors],['content',t.content],['sections',t.sections],['typography',t.typography]];
+
+  function ColorRow({label,path,val}){
+    return React.createElement('div',{className:'design-row'},
+      React.createElement('span',{className:'design-label'},label),
+      React.createElement('div',{className:'color-input-wrap'},
+        React.createElement('div',{className:'color-swatch',style:{background:val}}),
+        React.createElement('input',{type:'color',value:val,onChange:e=>update(path,e.target.value)})
+      )
+    );
+  }
+
+  return React.createElement('div',{className:'design-panel'},
+    React.createElement('div',{className:'design-panel-header'},
+      React.createElement('span',{className:'design-panel-title'},t.designPanel),
+      React.createElement('button',{onClick:onClose,style:{background:'none',border:'none',color:'var(--text3)',fontSize:20,cursor:'pointer',lineHeight:1}},'×')
+    ),
+    React.createElement('div',{className:'design-panel-body'},
+      React.createElement('div',{className:'design-tabs'},
+        TABS.map(([key,label])=>React.createElement('button',{key,className:'design-tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
+      ),
+      tab==='colors'&&cfg.colors&&React.createElement('div',null,
+        React.createElement('div',{className:'design-section-title'},t.colors),
+        React.createElement(ColorRow,{label:t.primaryColor,path:'colors.primary',val:cfg.colors.primary}),
+        React.createElement(ColorRow,{label:t.accentColor,path:'colors.accent',val:cfg.colors.accent}),
+        React.createElement(ColorRow,{label:t.goldColor,path:'colors.gold',val:cfg.colors.gold}),
+        React.createElement(ColorRow,{label:t.bgColor,path:'colors.bg',val:cfg.colors.bg}),
+        React.createElement(ColorRow,{label:t.textColor,path:'colors.text',val:cfg.colors.text}),
+        React.createElement('div',{style:{marginTop:16}},
+          React.createElement('div',{className:'design-section-title'},'Quick Presets'),
+          React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}},
+            [['🔥 Fire','#FF2D55','#FF6B2B','#FFD700','#070707','#e8e8e8'],
+             ['💙 Ocean','#0099FF','#00D4FF','#00FFCC','#05080d','#e8ecf0'],
+             ['💚 Matrix','#00FF41','#39FF14','#FFFF00','#000400','#e0ffe0'],
+             ['🟣 Purple','#9B59B6','#E056FD','#FFD700','#080510','#f0e8ff']].map(([label,p,a,g,bg,tx])=>
+              React.createElement('button',{key:label,onClick:()=>{const n={...cfg,colors:{primary:p,accent:a,gold:g,bg,text:tx}};setCfg(n);applyDesign(n);},style:{background:'var(--bg4)',border:'1px solid var(--border)',color:'var(--text)',fontSize:11,fontWeight:700,padding:'6px 8px',borderRadius:4,cursor:'pointer',transition:'all .2s',letterSpacing:.5}},label)
+            )
+          )
+        )
+      ),
+      tab==='content'&&React.createElement('div',null,
+        React.createElement('div',{className:'design-section-title'},'Hero'),
+        React.createElement('div',{className:'form-group',style:{marginBottom:12}},
+          React.createElement('label',{style:{fontSize:10,color:'var(--text3)',marginBottom:4}},'TITLE LINE 1'),
+          React.createElement('input',{className:'design-input',value:cfg.heroTitle1||'',onChange:e=>update('heroTitle1',e.target.value)})
+        ),
+        React.createElement('div',{className:'form-group',style:{marginBottom:12}},
+          React.createElement('label',{style:{fontSize:10,color:'var(--text3)',marginBottom:4}},'TITLE LINE 2'),
+          React.createElement('input',{className:'design-input',value:cfg.heroTitle2||'',onChange:e=>update('heroTitle2',e.target.value)})
+        ),
+        React.createElement('div',{className:'form-group',style:{marginBottom:16}},
+          React.createElement('label',{style:{fontSize:10,color:'var(--text3)',marginBottom:4}},'SUBTITLE'),
+          React.createElement('textarea',{className:'design-textarea',value:cfg.heroSubtitle||'',onChange:e=>update('heroSubtitle',e.target.value)})
+        ),
+        React.createElement('div',{className:'design-section-title'},'Footer & Branding'),
+        React.createElement('div',{className:'form-group',style:{marginBottom:12}},
+          React.createElement('label',{style:{fontSize:10,color:'var(--text3)',marginBottom:4}},'FOOTER TEXT'),
+          React.createElement('input',{className:'design-input',value:cfg.footerText||'',onChange:e=>update('footerText',e.target.value)})
+        )
+      ),
+      tab==='sections'&&cfg.sections&&React.createElement('div',null,
+        React.createElement('div',{className:'design-section-title'},t.sections),
+        ...[['hero',t.showHero],['statBar',t.showStats],['battles',t.showBattles],['rappers',t.showRappers],['news',t.showNews]].map(([key,label])=>
+          React.createElement('div',{key,className:'design-toggle-row'},
+            React.createElement('span',{className:'design-label'},label),
+            React.createElement('label',{className:'toggle'},
+              React.createElement('input',{type:'checkbox',checked:!!cfg.sections[key],onChange:e=>update('sections.'+key,e.target.checked)}),
+              React.createElement('span',{className:'slider'})
+            )
+          )
+        )
+      ),
+      tab==='typography'&&React.createElement('div',null,
+        React.createElement('div',{className:'design-section-title'},'Custom CSS'),
+        React.createElement('p',{style:{fontSize:11,color:'var(--text3)',marginBottom:8}},'Add custom CSS to override any styles. Applied globally.'),
+        React.createElement('textarea',{className:'design-textarea',style:{minHeight:200,fontFamily:'monospace',fontSize:11},value:cfg.customCSS||'',onChange:e=>update('customCSS',e.target.value),placeholder:'/* your custom css here */\n.navbar { ... }\n.hero { ... }'})
+      )
+    ),
+    React.createElement('div',{className:'design-panel-footer'},
+      React.createElement('button',{className:'btn-save-design',onClick:save,disabled:saving},saving?'Saving...':t.saveDesign),
+    ),
+    saved&&React.createElement('div',{className:'design-success',style:{padding:'0 12px 8px'}},t.designSaved)
+  );
+}
+
+// ─── MAIN APP ─────────────────────────────────────────────────────────────────
+function App(){
+  const [lang,setLang]=useState('en');
+  const t=T[lang];
+  const [page,setPage]=useState('home');
+  const [pageId,setPageId]=useState(null);
+  const [currentUser,setCurrentUser]=useState(null);
+  const [authLoading,setAuthLoading]=useState(true);
+  const [settings,setSettings]=useState({maintenanceMode:false,registrationOpen:true,chatEnabled:true,siteName:'Flow & Bars',seasonText:'Season 3'});
+  const [designMode,setDesignMode]=useState(false);
+  const [designConfig,setDesignConfig]=useState(null);
+
+  useEffect(()=>{
+    const token=getToken();
+    if(token){
+      GET('/auth/me').then(u=>setCurrentUser(u)).catch(()=>setToken(null)).finally(()=>setAuthLoading(false));
+    } else { setAuthLoading(false); }
+    GET('/settings').then(setSettings).catch(()=>{});
+    GET('/design').then(d=>{setDesignConfig(d);applyDesign(d);}).catch(()=>{});
+  },[]);
+
+  function applyDesign(d){
+    if(!d||!d.colors) return;
+    const s=document.getElementById('design-vars');
+    if(s) s.textContent=`:root{--red:${d.colors.primary};--red2:${d.colors.primary};--cyan:${d.colors.accent};--gold:${d.colors.gold};--bg:${d.colors.bg};--text:${d.colors.text};--bg2:#0d0d0d;--bg3:#111;--bg4:#161616;--bg5:#1c1c1c;--border:#222;--border2:#2a2a2a;--text2:#aaa;--text3:#666;--orange:#FF6B2B;--purple:#B44FFF;--green:#00FF87;--font-display:'Bebas Neue',cursive;--font-ui:'Rajdhani',sans-serif;--font-mono:'Share Tech Mono',monospace;}`;
+  }
+
+  useEffect(()=>{
+    if(designMode) document.body.classList.add('design-mode');
+    else document.body.classList.remove('design-mode');
+  },[designMode]);
+
+  const nav=(p,id=null)=>{setPage(p);setPageId(id);window.scrollTo(0,0);};
+  const logout=()=>{setToken(null);setCurrentUser(null);nav('home');};
+
+  if(authLoading) return React.createElement('div',{style:{position:'fixed',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:'var(--bg)'}},React.createElement('div',{className:'spinner'}));
+
+  if(settings.maintenanceMode&&currentUser?.role!=='admin'){
+    return React.createElement('div',{className:'maintenance'},
+      React.createElement('h1',null,t.maintenance),
+      React.createElement('p',{style:{color:'var(--text2)',fontSize:16}},t.maintenanceMsg),
+      React.createElement('button',{className:'btn-primary btn-sm mt-8',onClick:()=>nav('login')},t.login)
+    );
+  }
+
+  const props={t,lang,setLang,page,nav,pageId,currentUser,setCurrentUser,logout,settings,setSettings,designConfig,designMode};
+
+  return React.createElement('div',{id:'app'},
+    React.createElement(Navbar,{...props,onToggleDesign:()=>setDesignMode(m=>!m)}),
+    React.createElement('main',null,
+      page==='home'&&React.createElement(HomePage,{...props}),
+      page==='battles'&&React.createElement(BattlesPage,{...props}),
+      page==='battle'&&React.createElement(BattleDetailPage,{...props}),
+      page==='rappers'&&React.createElement(RappersPage,{...props}),
+      page==='rapper'&&React.createElement(RapperProfilePage,{...props}),
+      page==='leaderboard'&&React.createElement(LeaderboardPage,{...props}),
+      page==='chat'&&React.createElement(ChatPage,{...props}),
+      page==='news'&&React.createElement(NewsPage,{...props}),
+      page==='article'&&React.createElement(ArticlePage,{...props}),
+      page==='login'&&React.createElement(LoginPage,{...props}),
+      page==='register'&&React.createElement(RegisterPage,{...props}),
+      page==='profile'&&React.createElement(ProfilePage,{...props}),
+      page==='admin'&&currentUser?.role==='admin'&&React.createElement(AdminPanel,{...props}),
+      page==='modpanel'&&['moderator','admin'].includes(currentUser?.role)&&React.createElement(ModPanel,{...props}),
+      page==='designerpanel'&&['designer','admin'].includes(currentUser?.role)&&React.createElement(DesignerPanelPage,{...props}),
+      page==='judgepanel'&&['judge','admin'].includes(currentUser?.role)&&React.createElement(JudgePanelPage,{...props}),
+    ),
+    React.createElement(Footer,{...props}),
+    currentUser?.role==='admin'&&React.createElement(React.Fragment,null,
+      React.createElement('button',{className:'design-fab'+(designMode?' active':''),onClick:()=>setDesignMode(m=>!m)},designMode?'✕ Exit Design':'🎨 Design Mode'),
+      designMode&&React.createElement(DesignPanel,{t,onClose:()=>setDesignMode(false),onSave:d=>{setDesignConfig(d);applyDesign(d);}})
+    )
+  );
+}
+
+// ─── NAVBAR ───────────────────────────────────────────────────────────────────
+function Navbar({t,lang,setLang,page,nav,currentUser,logout,onToggleDesign}){
+  return React.createElement('nav',{className:'navbar'},
+    React.createElement('div',{className:'nav-logo',onClick:()=>nav('home')},'F&B'),
+    React.createElement('div',{className:'nav-links'},
+      ...[['home',t.home],['battles',t.battles],['rappers',t.rappers],['leaderboard',t.leaderboard],['chat',t.chat],['news',t.news]].map(([pg,label])=>
+        React.createElement('button',{key:pg,className:'nav-btn'+(page===pg?' active':''),onClick:()=>nav(pg)},label)
+      ),
+      currentUser?.role==='admin'&&React.createElement('button',{className:'nav-btn',style:{color:'#ff9900'},onClick:()=>nav('admin')},t.adminPanel),
+      ['moderator','admin'].includes(currentUser?.role)&&React.createElement('button',{className:'nav-btn',style:{color:'#FF6B2B'},onClick:()=>nav('modpanel')},t.modPanel),
+      ['designer','admin'].includes(currentUser?.role)&&React.createElement('button',{className:'nav-btn',style:{color:'#B44FFF'},onClick:()=>nav('designerpanel')},t.designerPanel),
+      ['judge','admin'].includes(currentUser?.role)&&React.createElement('button',{className:'nav-btn',style:{color:'#FFD700'},onClick:()=>nav('judgepanel')},t.judgePanel),
+    ),
+    React.createElement('div',{className:'nav-right'},
+      React.createElement('button',{className:'lang-btn',onClick:()=>setLang(l=>l==='en'?'ka':'en')},lang==='en'?'🇬🇪 KA':'🇬🇧 EN'),
+      currentUser
+        ?React.createElement(React.Fragment,null,
+            React.createElement('button',{className:'nav-btn',onClick:()=>nav('profile')},
+              React.createElement('span',{style:{marginRight:6}},currentUser.avatar||'👤'),
+              React.createElement(RoleBadge,{role:currentUser.role})
+            ),
+            React.createElement('button',{className:'btn-outline btn-sm',onClick:logout},t.logout)
+          )
+        :React.createElement(React.Fragment,null,
+            React.createElement('button',{className:'btn-outline btn-sm',onClick:()=>nav('login')},t.login),
+            React.createElement('button',{className:'btn-primary btn-sm',onClick:()=>nav('register')},t.register)
+          )
+    )
+  );
+}
+
+// ─── HOME PAGE ────────────────────────────────────────────────────────────────
+function HomePage({t,nav,lang,settings,designConfig}){
+  const [battles,setBattles]=useState([]);
+  const [rappers,setRappers]=useState([]);
+  const [news,setNews]=useState([]);
+  const [banners,setBanners]=useState([]);
+  const [stats,setStats]=useState({});
+  const cfg=designConfig||{sections:{hero:true,statBar:true,battles:true,rappers:true,news:true}};
+  const sections=cfg.sections||{hero:true,statBar:true,battles:true,rappers:true,news:true};
+
+  useEffect(()=>{
+    Promise.all([GET('/battles'),GET('/rappers'),GET('/news'),GET('/banners'),GET('/stats')])
+      .then(([b,r,n,bn,s])=>{setBattles(b);setRappers(r);setNews(n);setBanners(bn);setStats(s);}).catch(()=>{});
+  },[]);
+
+  const featured=battles.find(b=>b.featured)||battles.find(b=>b.status==='live')||battles[0];
+  const topRappers=[...rappers].sort((a,b)=>b.pts-a.pts).slice(0,3);
+  const activeBanner=banners.find(b=>b.active);
+  const [p1,p2]=votePercent(featured?.votes1||0,featured?.votes2||0);
+
+  return React.createElement('div',{className:'page'},
+    activeBanner&&React.createElement('div',{style:{background:activeBanner.color,padding:'14px 0',textAlign:'center',borderBottom:'1px solid var(--border)'}},
+      React.createElement('span',{style:{fontFamily:'var(--font-display)',fontSize:20,letterSpacing:2}},activeBanner.emoji+' '+activeBanner.title)
+    ),
+    sections.hero!==false&&React.createElement('section',{className:'hero'},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'hero-grid'},
+          React.createElement('div',null,
+            React.createElement('div',{style:{color:'var(--red)',fontSize:12,fontWeight:700,letterSpacing:3,textTransform:'uppercase',marginBottom:8}},settings.seasonText),
+            React.createElement('h1',{className:'hero-title','data-editable':'heroTitle1'},
+              cfg.heroTitle1||'FLOW',React.createElement('br'),
+              React.createElement('span',{style:{color:'var(--red)'},'data-editable':'heroTitle2'},cfg.heroTitle2||'& BARS')
+            ),
+            React.createElement('p',{className:'hero-sub','data-editable':'heroSubtitle'},cfg.heroSubtitle||(lang==='ka'?"საქართველოს #1 რეპ-ბეთლ პლატფორმა.":"Georgia's #1 rap battle platform. Watch live battles, vote, and be part of the culture.")),
+            React.createElement('div',{className:'hero-actions'},
+              React.createElement('button',{className:'btn-primary',onClick:()=>nav('battles')},t.battles),
+              React.createElement('button',{className:'btn-outline',onClick:()=>nav('rappers')},t.rappers)
+            )
+          ),
+          featured&&React.createElement('div',{style:{background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:12,overflow:'hidden'}},
+            React.createElement('div',{style:{height:200,background:'linear-gradient(135deg,#1a0505,#05051a)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12,cursor:'pointer'},onClick:()=>nav('battle',featured.id)},
+              getBattleStatus(featured.status,t),
+              React.createElement('div',{style:{fontSize:48,opacity:.4}},'▶'),
+              React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,letterSpacing:1}},featured.title)
+            ),
+            React.createElement('div',{style:{padding:'12px 16px'}},
+              React.createElement('div',{className:'vote-pct'},React.createElement('span',null,featured.rapper1+' '+p1+'%'),React.createElement('span',null,p2+'% '+featured.rapper2)),
+              React.createElement('div',{className:'vote-bar'},React.createElement('div',{className:'vote-bar-a',style:{width:p1+'%'}}),React.createElement('div',{className:'vote-bar-b',style:{width:p2+'%'}}))
+            )
+          )
+        )
+      )
+    ),
+    sections.statBar!==false&&React.createElement('div',{className:'stats-bar'},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'stats-bar-inner'},
+          ...[[stats.battles||0,'Battles'],[stats.rappers||0,'Rappers'],[(stats.totalVotes||0).toLocaleString(),'Votes'],[stats.liveBattles||0,'Live']].map(([n,l],i)=>
+            React.createElement('div',{key:i,className:'stat-item'},React.createElement('div',{className:'num'},n),React.createElement('div',{className:'lbl'},l))
+          )
+        )
+      )
+    ),
+    sections.battles!==false&&React.createElement('section',{style:{padding:'48px 0'}},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'section-header flex-between'},
+          React.createElement('div',{className:'flex-center gap-12'},React.createElement('div',{className:'accent-bar'}),React.createElement('h2',null,t.battles)),
+          React.createElement('button',{className:'btn-outline btn-sm',onClick:()=>nav('battles')},t.viewAll)
+        ),
+        React.createElement('div',{className:'grid-auto'},battles.slice(0,4).map(b=>React.createElement(BattleCard,{key:b.id,battle:b,t,nav})))
+      )
+    ),
+    sections.rappers!==false&&React.createElement('section',{style:{padding:'0 0 48px'}},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'section-header flex-between'},
+          React.createElement('div',{className:'flex-center gap-12'},React.createElement('div',{className:'accent-bar',style:{background:'var(--gold)'}}),React.createElement('h2',null,t.topRappers)),
+          React.createElement('button',{className:'btn-outline btn-sm',onClick:()=>nav('rappers')},t.viewAll)
+        ),
+        React.createElement('div',{className:'grid-3'},topRappers.map(r=>React.createElement(RapperCard,{key:r.id,rapper:r,t,nav})))
+      )
+    ),
+    sections.news!==false&&React.createElement('section',{style:{padding:'0 0 48px'}},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'section-header flex-between'},
+          React.createElement('div',{className:'flex-center gap-12'},React.createElement('div',{className:'accent-bar',style:{background:'var(--cyan)'}}),React.createElement('h2',null,t.latestNews)),
+          React.createElement('button',{className:'btn-outline btn-sm',onClick:()=>nav('news')},t.viewAll)
+        ),
+        React.createElement('div',{className:'grid-3'},news.slice(0,3).map(a=>React.createElement(NewsCard,{key:a.id,article:a,t,nav,lang})))
+      )
+    )
+  );
+}
+
+// ─── REUSABLE CARDS ───────────────────────────────────────────────────────────
+function BattleCard({battle,t,nav}){
+  const [p1,p2]=votePercent(battle.votes1,battle.votes2);
+  return React.createElement('div',{className:'battle-card',onClick:()=>nav('battle',battle.id)},
+    React.createElement('div',{className:'battle-card-header'},
+      React.createElement('span',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:'var(--text3)'}},battle.round),
+      getBattleStatus(battle.status,t)
+    ),
+    React.createElement('div',{className:'battle-vs'},
+      React.createElement('div',{className:'rapper-side'},React.createElement('div',{className:'rapper-avatar'},battle.rapper1?.[0]||'?'),React.createElement('div',{className:'rapper-name'},battle.rapper1),battle.winner===battle.rapper1&&React.createElement('div',{style:{fontSize:11,color:'var(--gold)',marginTop:2}},'👑 '+t.winner)),
+      React.createElement('div',{className:'vs-text'},t.versus),
+      React.createElement('div',{className:'rapper-side'},React.createElement('div',{className:'rapper-avatar'},battle.rapper2?.[0]||'?'),React.createElement('div',{className:'rapper-name'},battle.rapper2),battle.winner===battle.rapper2&&React.createElement('div',{style:{fontSize:11,color:'var(--gold)',marginTop:2}},'👑 '+t.winner))
+    ),
+    React.createElement('div',{className:'vote-bar-wrap'},
+      React.createElement('div',{className:'vote-pct'},React.createElement('span',null,p1+'%'),React.createElement('span',null,p2+'%')),
+      React.createElement('div',{className:'vote-bar'},React.createElement('div',{className:'vote-bar-a',style:{width:p1+'%'}}),React.createElement('div',{className:'vote-bar-b',style:{width:p2+'%'}}))
+    )
+  );
+}
+
+function RapperCard({rapper,t,nav}){
+  return React.createElement('div',{className:'rapper-card',onClick:()=>nav('rapper',rapper.id)},
+    React.createElement('div',{className:'rapper-big-avatar'},rapper.emoji||rapper.username?.[0]||'🎤'),
+    React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22,letterSpacing:1}},rapper.username),
+    React.createElement('div',{style:{fontSize:12,color:'var(--text3)',marginTop:4}},rapper.city),
+    React.createElement('div',{className:'rapper-stats-row'},
+      React.createElement('div',{className:'mini-stat'},React.createElement('div',{className:'v',style:{color:'var(--green)'}},rapper.wins),React.createElement('div',{className:'l'},t.wins)),
+      React.createElement('div',{className:'mini-stat'},React.createElement('div',{className:'v',style:{color:'var(--red)'}},rapper.losses),React.createElement('div',{className:'l'},t.losses)),
+      React.createElement('div',{className:'mini-stat'},React.createElement('div',{className:'v',style:{color:'var(--gold)'}},rapper.pts),React.createElement('div',{className:'l'},t.pts))
+    )
+  );
+}
+
+function NewsCard({article,t,nav,lang}){
+  const title=lang==='ka'?(article.title_ka||article.titleKa):(article.title_en||article.titleEn);
+  const excerpt=lang==='ka'?(article.excerpt_ka||article.excerptKa):(article.excerpt_en||article.excerptEn);
+  return React.createElement('div',{className:'news-card',onClick:()=>nav('article',article.id)},
+    React.createElement('div',{className:'news-img'},article.emoji||'📰'),
+    React.createElement('div',{className:'news-body'},
+      React.createElement('div',{className:'news-cat'},article.category),
+      React.createElement('div',{className:'news-title'},title),
+      React.createElement('div',{className:'news-excerpt'},excerpt),
+      React.createElement('div',{className:'news-meta'},React.createElement('span',null,(t.articleBy||'By')+' '+article.author),React.createElement('span',null,'·'),React.createElement('span',null,timeAgo(article.date)))
+    )
+  );
+}
+
+// ─── BATTLES PAGE ─────────────────────────────────────────────────────────────
+function BattlesPage({t,nav}){
+  const [battles,setBattles]=useState([]);
+  const [filter,setFilter]=useState('all');
+  useEffect(()=>{GET('/battles').then(setBattles).catch(()=>{})},[]);
+  const filtered=filter==='all'?battles:battles.filter(b=>b.status===filter);
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'section-header'},React.createElement('div',{className:'accent-bar'}),React.createElement('h2',null,t.battles)),
+      React.createElement('div',{className:'tabs'},
+        [['all',t.allBattles],['live',t.liveBattles],['upcoming',t.upcomingBattles],['finished',t.finishedBattles]].map(([v,l])=>React.createElement('button',{key:v,className:'tab'+(filter===v?' active':''),onClick:()=>setFilter(v)},l))
+      ),
+      filtered.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,t.noResults)):React.createElement('div',{className:'grid-auto'},filtered.map(b=>React.createElement(BattleCard,{key:b.id,battle:b,t,nav})))
+    )
+  );
+}
+
+// ─── BATTLE DETAIL ────────────────────────────────────────────────────────────
+function BattleDetailPage({t,nav,pageId,currentUser}){
+  const [battle,setBattle]=useState(null);
+  const [rappers,setRappers]=useState([]);
+  const [myVote,setMyVote]=useState(null);
+  const [comment,setComment]=useState('');
+  const [msg,setMsg]=useState('');
+
+  useEffect(()=>{
+    GET('/battles/'+pageId).then(b=>{setBattle(b);}).catch(()=>{});
+    GET('/rappers').then(setRappers).catch(()=>{});
+    if(currentUser) GET('/battles/'+pageId+'/myvote').then(v=>setMyVote(v.side)).catch(()=>{});
+  },[pageId,currentUser]);
+
+  if(!battle) return React.createElement('div',{style:{padding:60,textAlign:'center'}},React.createElement('div',{className:'spinner'}));
+
+  const [p1,p2]=votePercent(battle.votes1,battle.votes2);
+  const rapper1=rappers.find(r=>r.id===battle.rapper1_id);
+  const rapper2=rappers.find(r=>r.id===battle.rapper2_id);
+
+  const vote=async(side)=>{
+    if(!currentUser){nav('login');return;}
+    if(myVote) return;
+    try{
+      await POST('/battles/'+battle.id+'/vote',{side});
+      setMyVote(side);
+      setBattle(b=>({...b,[side==='a'?'votes1':'votes2']:b[side==='a'?'votes1':'votes2']+1}));
+    }catch(e){setMsg(e.message);}
+  };
+
+  const addComment=async()=>{
+    if(!comment.trim()||!currentUser) return;
+    try{
+      const c=await POST('/battles/'+battle.id+'/comments',{text:comment});
+      setBattle(b=>({...b,comments:[...(b.comments||[]),c]}));
+      setComment('');
+    }catch(e){setMsg(e.message);}
+  };
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 300px',gap:24}},
+        React.createElement('div',null,
+          React.createElement('div',{style:{borderRadius:10,marginBottom:20,border:'1px solid var(--border)',height:280,background:'linear-gradient(135deg,#1a0505,#05051a)',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}},
+            getBattleStatus(battle.status,t),React.createElement('div',{style:{fontSize:56,opacity:.4}},'▶'),React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22,letterSpacing:2}},battle.title)
+          ),
+          React.createElement('div',{className:'card',style:{padding:24,marginBottom:20}},
+            React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr auto 1fr',gap:16,alignItems:'center',marginBottom:16}},
+              React.createElement('div',{style:{textAlign:'center'}},
+                React.createElement('div',{style:{fontSize:40,marginBottom:8}},rapper1?.emoji||battle.rapper1?.[0]),
+                React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22}},battle.rapper1),
+                React.createElement('div',{style:{fontFamily:'var(--font-mono)',fontSize:12,color:'var(--red)',marginTop:4}},p1+'%'),
+                battle.status==='live'&&React.createElement('button',{className:'btn-primary btn-sm mt-8',style:myVote==='a'?{background:'var(--green)',color:'#000'}:{},onClick:()=>vote('a'),disabled:!!myVote},myVote==='a'?t.voted:t.voteLive)
+              ),
+              React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:32,color:'var(--text3)',letterSpacing:3}},t.versus),
+              React.createElement('div',{style:{textAlign:'center'}},
+                React.createElement('div',{style:{fontSize:40,marginBottom:8}},rapper2?.emoji||battle.rapper2?.[0]),
+                React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22}},battle.rapper2),
+                React.createElement('div',{style:{fontFamily:'var(--font-mono)',fontSize:12,color:'var(--cyan)',marginTop:4}},p2+'%'),
+                battle.status==='live'&&React.createElement('button',{className:'btn-outline btn-sm mt-8',style:myVote==='b'?{borderColor:'var(--cyan)',color:'var(--cyan)'}:{},onClick:()=>vote('b'),disabled:!!myVote},myVote==='b'?t.voted:t.voteLive)
+              )
+            ),
+            React.createElement('div',{style:{height:8,background:'var(--bg5)',borderRadius:4,overflow:'hidden',display:'flex'}},React.createElement('div',{style:{width:p1+'%',background:'var(--red)',transition:'width .5s'}}),React.createElement('div',{style:{width:p2+'%',background:'var(--cyan)',transition:'width .5s'}})),
+            battle.winner&&React.createElement('div',{style:{textAlign:'center',marginTop:12,fontFamily:'var(--font-display)',fontSize:18,color:'var(--gold)'}},'👑 '+t.winner+': '+battle.winner),
+            msg&&React.createElement('div',{style:{color:'var(--red)',fontSize:12,marginTop:8,textAlign:'center'}},msg)
+          ),
+          React.createElement('div',{className:'card',style:{padding:20}},
+            React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,letterSpacing:1,marginBottom:14}},t.comments+' ('+(battle.comments?.length||0)+')'),
+            React.createElement('div',{style:{maxHeight:280,overflowY:'auto',marginBottom:14,display:'flex',flexDirection:'column',gap:8}},
+              (battle.comments||[]).map(c=>React.createElement('div',{key:c.id,style:{display:'flex',gap:8}},
+                React.createElement('div',{className:'chat-avatar'},c.avatar||c.username?.[0]),
+                React.createElement('div',null,React.createElement('div',{style:{fontSize:12,fontWeight:700,color:ROLE_COLORS[c.role]||'var(--cyan)'}},c.username),React.createElement('div',{className:'chat-text'},c.text))
+              ))
+            ),
+            currentUser
+              ?React.createElement('div',{style:{display:'flex',gap:8}},
+                  React.createElement('input',{className:'input-field',value:comment,onChange:e=>setComment(e.target.value),placeholder:t.commentPlaceholder,onKeyDown:e=>e.key==='Enter'&&addComment(),style:{flex:1}}),
+                  React.createElement('button',{className:'btn-primary btn-sm',onClick:addComment},'+')
+                )
+              :React.createElement('p',{style:{color:'var(--text3)',fontSize:13}},React.createElement('span',{style:{color:'var(--red)',cursor:'pointer'},onClick:()=>nav('login')},t.login),' to comment')
+          )
+        ),
+        React.createElement('div',null,
+          React.createElement('div',{className:'card',style:{padding:14,marginBottom:12}},
+            ...[['📅',battle.date],['👀',(battle.views||0).toLocaleString()],['🗳️',(battle.votes1+battle.votes2).toString()],['🎯',battle.round]].map(([icon,val])=>
+              React.createElement('div',{key:icon,style:{display:'flex',justifyContent:'space-between',fontSize:13,padding:'6px 0',borderBottom:'1px solid var(--border)'}},React.createElement('span',{style:{color:'var(--text3)'}},icon),React.createElement('span',null,val))
+            )
+          ),
+          rapper1&&React.createElement('div',{className:'card',style:{padding:12,cursor:'pointer',marginBottom:8},onClick:()=>nav('rapper',rapper1.id)},React.createElement('div',{style:{display:'flex',gap:10,alignItems:'center'}},React.createElement('span',{style:{fontSize:28}},rapper1.emoji),React.createElement('div',null,React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:16}},rapper1.username),React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},rapper1.city)))),
+          rapper2&&React.createElement('div',{className:'card',style:{padding:12,cursor:'pointer'},onClick:()=>nav('rapper',rapper2.id)},React.createElement('div',{style:{display:'flex',gap:10,alignItems:'center'}},React.createElement('span',{style:{fontSize:28}},rapper2.emoji),React.createElement('div',null,React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:16}},rapper2.username),React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},rapper2.city))))
+        )
+      )
+    )
+  );
+}
+
+// ─── RAPPERS PAGE ─────────────────────────────────────────────────────────────
+function RappersPage({t,nav}){
+  const [rappers,setRappers]=useState([]);
+  const [search,setSearch]=useState('');
+  useEffect(()=>{GET('/rappers').then(setRappers).catch(()=>{});},[]);
+  const filtered=rappers.filter(r=>r.username.toLowerCase().includes(search.toLowerCase())||r.city?.toLowerCase().includes(search.toLowerCase()));
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'section-header'},React.createElement('div',{className:'accent-bar',style:{background:'var(--gold)'}}),React.createElement('h2',null,t.rappers||'Rappers')),
+      React.createElement('div',{className:'search-box mb-16',style:{maxWidth:400}},
+        React.createElement('span',{className:'search-icon'},'🔍'),
+        React.createElement('input',{className:'input-field',value:search,onChange:e=>setSearch(e.target.value),placeholder:'Search rappers...'})
+      ),
+      React.createElement('div',{className:'grid-auto'},filtered.map(r=>React.createElement(RapperCard,{key:r.id,rapper:r,t,nav})))
+    )
+  );
+}
+
+// ─── RAPPER PROFILE ───────────────────────────────────────────────────────────
+function RapperProfilePage({t,nav,pageId,currentUser}){
+  const [rapper,setRapper]=useState(null);
+  const [battles,setBattles]=useState([]);
+  const [following,setFollowing]=useState(false);
+  useEffect(()=>{
+    GET('/rappers/'+pageId).then(r=>{setRapper(r);}).catch(()=>{});
+    GET('/battles').then(bs=>setBattles(bs.filter(b=>b.rapper1_id===Number(pageId)||b.rapper2_id===Number(pageId)))).catch(()=>{});
+    if(currentUser) GET('/rappers/'+pageId+'/following').then(r=>setFollowing(r.following)).catch(()=>{});
+  },[pageId,currentUser]);
+  if(!rapper) return React.createElement('div',{style:{padding:60,textAlign:'center'}},React.createElement('div',{className:'spinner'}));
+  const toggleFollow=async()=>{
+    if(!currentUser){nav('login');return;}
+    try{const r=await POST('/rappers/'+rapper.id+'/follow',{});setFollowing(r.following);setRapper(p=>({...p,followers:p.followers+(r.following?1:-1)}));}catch(e){}
+  };
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'profile-header'},
+        React.createElement('div',{className:'profile-avatar'},rapper.emoji),
+        React.createElement('div',null,
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:40,letterSpacing:2}},rapper.username),
+          React.createElement('div',{style:{color:'var(--text2)',fontSize:14}},rapper.real_name+' · '+rapper.city),
+          React.createElement('div',{style:{color:'var(--text3)',fontSize:13,marginTop:4}},rapper.style),
+          React.createElement('div',{style:{color:'var(--text2)',fontSize:14,marginTop:8}},rapper.bio)
+        ),
+        React.createElement('div',{style:{textAlign:'right'}},
+          React.createElement('button',{className:following?'btn-outline':'btn-primary',onClick:toggleFollow},following?t.unfollow:t.follow),
+          React.createElement('div',{style:{fontFamily:'var(--font-mono)',fontSize:12,color:'var(--text3)',marginTop:8}},rapper.followers+' '+t.following)
+        )
+      ),
+      React.createElement('div',{className:'grid-4 mb-16'},
+        ...[[rapper.wins,t.wins,'var(--green)'],[rapper.losses,t.losses,'var(--red)'],[rapper.pts,t.pts,'var(--gold)'],[rapper.followers,t.following,'var(--cyan)']].map(([val,label,color])=>
+          React.createElement('div',{key:label,className:'stat-box'},React.createElement('div',{className:'stat-num',style:{color}},val),React.createElement('div',{className:'stat-label'},label))
+        )
+      ),
+      React.createElement('div',{className:'section-header'},React.createElement('div',{className:'accent-bar'}),React.createElement('h2',null,t.battleHistory)),
+      battles.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,t.noResults)):React.createElement('div',{className:'grid-auto'},battles.map(b=>React.createElement(BattleCard,{key:b.id,battle:b,t,nav})))
+    )
+  );
+}
+
+// ─── LEADERBOARD ─────────────────────────────────────────────────────────────
+function LeaderboardPage({t,nav}){
+  const [rappers,setRappers]=useState([]);
+  const [sort,setSort]=useState('pts');
+  useEffect(()=>{GET('/rappers').then(setRappers).catch(()=>{});},[]);
+  const sorted=[...rappers].sort((a,b)=>b[sort]-a[sort]);
+  const podiumOrder=[sorted[1],sorted[0],sorted[2]].filter(Boolean);
+  const podCls=['p2','p1','p3'];const podNums=['2','1','3'];
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'section-header'},React.createElement('div',{className:'accent-bar',style:{background:'var(--gold)'}}),React.createElement('h2',null,t.leaderboard)),
+      React.createElement('div',{className:'podium'},
+        podiumOrder.map((r,i)=>React.createElement('div',{key:r.id,className:'podium-item'},
+          React.createElement('div',{className:'podium-block '+podCls[i],onClick:()=>nav('rapper',r.id)},React.createElement('div',{style:{fontSize:32}},r.emoji),React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:28,color:'rgba(255,255,255,.2)',marginBottom:6}},podNums[i]==='1'?'👑':podNums[i])),
+          React.createElement('div',{className:'podium-name'},r.username),
+          React.createElement('div',{className:'podium-pts',style:{color:'var(--gold)'}},r.pts+' pts')
+        ))
+      ),
+      React.createElement('div',{className:'tabs'},[['pts','PTS'],[t.wins,'wins'],[t.following,'followers']].map(([label,key])=>React.createElement('button',{key,className:'tab'+(sort===key?' active':''),onClick:()=>setSort(key)},label))),
+      React.createElement('div',{className:'card'},
+        React.createElement('table',null,
+          React.createElement('thead',null,React.createElement('tr',null,...['#','','Rapper',t.pts,t.wins,t.losses,t.following].map(h=>React.createElement('th',{key:h},h)))),
+          React.createElement('tbody',null,sorted.map((r,i)=>React.createElement('tr',{key:r.id,style:{cursor:'pointer'},onClick:()=>nav('rapper',r.id)},
+            React.createElement('td',{style:{fontFamily:'var(--font-mono)',color:i===0?'var(--gold)':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)'}},i===0?'👑':i===1?'🥈':i===2?'🥉':i+1),
+            React.createElement('td',null,React.createElement('span',{style:{fontSize:24}},r.emoji)),
+            React.createElement('td',null,React.createElement('div',{style:{fontWeight:700}},r.username),React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},r.city)),
+            React.createElement('td',{style:{fontFamily:'var(--font-mono)',color:'var(--gold)',fontWeight:700}},r.pts),
+            React.createElement('td',{style:{color:'var(--green)'}},r.wins),
+            React.createElement('td',{style:{color:'var(--red)'}},r.losses),
+            React.createElement('td',{style:{color:'var(--cyan)'}},r.followers)
+          )))
+        )
+      )
+    )
+  );
+}
+
+// ─── CHAT PAGE ────────────────────────────────────────────────────────────────
+function ChatPage({t,nav,currentUser,settings}){
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState('');
+  const [aiTyping,setAiTyping]=useState(false);
+  const endRef=useRef(null);
+  const aiNames=['BeatKing_GE','TbilisiFan','RapCritic','FlowWatcher'];
+  const aiEmojis=['🎧','🔥','🎤','💿'];
+
+  useEffect(()=>{GET('/chat').then(setMessages).catch(()=>{});},[]);
+  useEffect(()=>{endRef.current?.scrollIntoView({behavior:'smooth'})},[messages,aiTyping]);
+
+  if(!settings.chatEnabled&&currentUser?.role!=='admin'){
+    return React.createElement('div',{style:{padding:'80px 0',textAlign:'center'}},React.createElement('div',{style:{fontSize:48,marginBottom:16}},'🔇'),React.createElement('h2',{style:{fontFamily:'var(--font-display)',fontSize:32}},t.chatDisabled));
+  }
+
+  const sendMsg=async()=>{
+    if(!input.trim()){return;}
+    if(!currentUser){nav('login');return;}
+    const q=input; setInput('');
+    try{
+      const msg=await POST('/chat',{text:q});
+      setMessages(m=>[...m,msg]);
+      setAiTyping(true);
+      try{
+        const r=await fetch('/api/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:"You are a fan in the Flow & Bars Georgian rap battle community chat. Short (1-2 sentences), enthusiastic, mix in Georgian words (კარგი, ბეთლი, რეპი, 🔥). Rappers: IceKing, GhostFlow, TbilisiBars, MtnCrest, NightRider, VoiceTbilisi. Never mention being AI.",messages:[{role:'user',content:q}]})});
+        const data=await r.json();
+        const text=data.content?.[0]?.text||'🔥 Georgian bars!';
+        const idx=Math.floor(Math.random()*aiNames.length);
+        const aiMsg=await POST('/chat/ai',{text,username:aiNames[idx],avatar:aiEmojis[idx]});
+        setMessages(m=>[...m,aiMsg]);
+      }catch{}
+      setAiTyping(false);
+    }catch(e){setAiTyping(false);}
+  };
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'chat-wrap'},
+        React.createElement('div',{className:'chat-main'},
+          React.createElement('div',{className:'chat-header'},
+            React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:22,letterSpacing:2}},'💬 '+t.chatTitle),
+            React.createElement('div',{style:{fontSize:12,color:'var(--green)',fontWeight:700}},'● Live')
+          ),
+          React.createElement('div',{className:'chat-messages'},
+            messages.map(msg=>React.createElement('div',{key:msg.id,className:'chat-msg'},
+              React.createElement('div',{className:'chat-avatar'},msg.avatar||msg.username?.[0]),
+              React.createElement('div',{className:'chat-content'},
+                React.createElement('div',{className:'chat-author'},
+                  React.createElement('span',{style:{color:ROLE_COLORS[msg.role]||'var(--cyan)',fontWeight:700,fontSize:12}},msg.username),
+                  React.createElement(RoleBadge,{role:msg.role}),
+                  msg.is_ai&&React.createElement('span',{style:{fontSize:9,color:'var(--text3)',fontFamily:'var(--font-mono)'}},'[AI]')
+                ),
+                React.createElement('div',{className:'chat-text'},msg.text),
+                React.createElement('div',{className:'chat-time'},msg.time)
+              )
+            )),
+            aiTyping&&React.createElement('div',{className:'chat-msg'},
+              React.createElement('div',{className:'chat-avatar'},'🤖'),
+              React.createElement('div',{className:'chat-content'},
+                React.createElement('div',{className:'chat-author',style:{color:'var(--text3)',fontSize:12}},'Typing...'),
+                React.createElement('div',{style:{padding:'8px 12px',background:'var(--bg4)',borderRadius:'0 8px 8px 8px',display:'inline-flex',gap:4}},
+                  React.createElement('span',{className:'typing-dot'}),React.createElement('span',{className:'typing-dot'}),React.createElement('span',{className:'typing-dot'})
+                )
+              )
+            ),
+            React.createElement('div',{ref:endRef})
+          ),
+          React.createElement('div',{className:'chat-input-row'},
+            React.createElement('input',{className:'input-field',value:input,onChange:e=>setInput(e.target.value),onKeyDown:e=>e.key==='Enter'&&sendMsg(),placeholder:currentUser?t.typeMsg:t.login+' to chat',disabled:!currentUser,style:{flex:1}}),
+            React.createElement('button',{className:'btn-primary',onClick:sendMsg,disabled:!currentUser||!input.trim()},t.send)
+          )
+        ),
+        React.createElement('div',{style:{display:'flex',flexDirection:'column',gap:16}},
+          React.createElement('div',{className:'online-list'},
+            React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:18,letterSpacing:1,marginBottom:12}},'● Online'),
+            React.createElement('div',{style:{color:'var(--text3)',fontSize:12}},'Several users online now 🟢')
+          )
+        )
+      )
+    )
+  );
+}
+
+// ─── NEWS PAGE ────────────────────────────────────────────────────────────────
+function NewsPage({t,nav,lang}){
+  const [news,setNews]=useState([]);
+  useEffect(()=>{GET('/news').then(setNews).catch(()=>{});},[]);
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'section-header'},React.createElement('div',{className:'accent-bar',style:{background:'var(--cyan)'}}),React.createElement('h2',null,t.news)),
+      React.createElement('div',{className:'grid-auto'},news.map(a=>React.createElement(NewsCard,{key:a.id,article:a,t,nav,lang})))
+    )
+  );
+}
+
+function ArticlePage({t,nav,lang,pageId}){
+  const [article,setArticle]=useState(null);
+  useEffect(()=>{GET('/news/'+pageId).then(setArticle).catch(()=>{});},[pageId]);
+  if(!article) return React.createElement('div',{style:{padding:60,textAlign:'center'}},React.createElement('div',{className:'spinner'}));
+  const title=lang==='ka'?(article.title_ka||article.titleKa):(article.title_en||article.titleEn);
+  const excerpt=lang==='ka'?(article.excerpt_ka||article.excerptKa):(article.excerpt_en||article.excerptEn);
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container',style:{maxWidth:800}},
+      React.createElement('div',{style:{textAlign:'center',marginBottom:32}},
+        React.createElement('div',{style:{fontSize:80,marginBottom:16}},article.emoji),
+        React.createElement('div',{style:{color:'var(--red)',fontSize:12,fontWeight:700,letterSpacing:2,textTransform:'uppercase',marginBottom:12}},article.category),
+        React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:48,letterSpacing:2,lineHeight:1.1,marginBottom:12}},title),
+        React.createElement('div',{style:{color:'var(--text2)',fontSize:14}},(t.articleBy||'By')+' '+article.author+' · '+timeAgo(article.date))
+      ),
+      React.createElement('div',{className:'card',style:{padding:32}},
+        React.createElement('p',{style:{fontSize:16,color:'var(--text2)',lineHeight:1.8,marginBottom:20}},excerpt),
+        React.createElement('p',{style:{fontSize:15,lineHeight:1.8}},article.content||'Full article content coming soon...')
+      ),
+      React.createElement('button',{className:'btn-outline btn-sm mt-16',onClick:()=>nav('news')},'← '+t.news)
+    )
+  );
+}
+
+// ─── LOGIN ────────────────────────────────────────────────────────────────────
+function LoginPage({t,nav,setCurrentUser}){
+  const [form,setForm]=useState({username:'',password:''});
+  const [error,setError]=useState('');
+  const [loading,setLoading]=useState(false);
+  const submit=async()=>{
+    if(!form.username||!form.password){setError('Please fill all fields');return;}
+    setLoading(true);setError('');
+    try{
+      const {token,user}=await POST('/auth/login',form);
+      setToken(token);setCurrentUser(user);nav('home');
+    }catch(e){setError(e.message);}
+    setLoading(false);
+  };
+  return React.createElement('div',{className:'page',style:{padding:'60px 0',display:'flex',justifyContent:'center'}},
+    React.createElement('div',{style:{width:'100%',maxWidth:420}},
+      React.createElement('div',{className:'card',style:{padding:32}},
+        React.createElement('h2',{style:{fontFamily:'var(--font-display)',fontSize:32,letterSpacing:2,marginBottom:24}},t.login),
+        error&&React.createElement('div',{style:{background:'rgba(255,45,85,.1)',border:'1px solid rgba(255,45,85,.3)',borderRadius:6,padding:'10px 14px',color:'var(--red)',fontSize:13,marginBottom:16}},error),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,t.username),React.createElement('input',{className:'input-field',value:form.username,autoComplete:'username',onChange:e=>setForm(f=>({...f,username:e.target.value})),onKeyDown:e=>e.key==='Enter'&&submit()})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,t.password),React.createElement('input',{className:'input-field',type:'password',autoComplete:'current-password',value:form.password,onChange:e=>setForm(f=>({...f,password:e.target.value})),onKeyDown:e=>e.key==='Enter'&&submit()})),
+        React.createElement('button',{className:'btn-primary',style:{width:'100%'},onClick:submit,disabled:loading},loading?'...':t.login),
+        React.createElement('div',{style:{textAlign:'center',marginTop:16,fontSize:13,color:'var(--text3)'}},t.noAccount,' ',React.createElement('span',{style:{color:'var(--red)',cursor:'pointer',fontWeight:700},onClick:()=>nav('register')},t.register))
+      )
+    )
+  );
+}
+
+// ─── REGISTER ─────────────────────────────────────────────────────────────────
+function RegisterPage({t,nav,setCurrentUser,settings}){
+  const [form,setForm]=useState({username:'',email:'',password:''});
+  const [error,setError]=useState('');
+  const [loading,setLoading]=useState(false);
+  if(!settings.registrationOpen) return React.createElement('div',{style:{padding:'80px 0',textAlign:'center'}},React.createElement('div',{style:{fontSize:48,marginBottom:16}},'🔒'),React.createElement('h2',{style:{fontFamily:'var(--font-display)',fontSize:32}},'Registration Closed'));
+  const submit=async()=>{
+    if(!form.username||!form.email||!form.password){setError('All fields required');return;}
+    setLoading(true);setError('');
+    try{
+      const {token,user}=await POST('/auth/register',form);
+      setToken(token);setCurrentUser(user);nav('home');
+    }catch(e){setError(e.message);}
+    setLoading(false);
+  };
+  return React.createElement('div',{className:'page',style:{padding:'60px 0',display:'flex',justifyContent:'center'}},
+    React.createElement('div',{style:{width:'100%',maxWidth:420}},
+      React.createElement('div',{className:'card',style:{padding:32}},
+        React.createElement('h2',{style:{fontFamily:'var(--font-display)',fontSize:32,letterSpacing:2,marginBottom:24}},t.register),
+        error&&React.createElement('div',{style:{background:'rgba(255,45,85,.1)',border:'1px solid rgba(255,45,85,.3)',borderRadius:6,padding:'10px 14px',color:'var(--red)',fontSize:13,marginBottom:16}},error),
+        ...['username','email','password'].map(field=>React.createElement('div',{key:field,className:'form-group'},React.createElement('label',null,t[field]||field),React.createElement('input',{className:'input-field',type:field==='password'?'password':field==='email'?'email':'text',autoComplete:field,value:form[field],onChange:e=>setForm(f=>({...f,[field]:e.target.value}))}))),
+        React.createElement('button',{className:'btn-primary',style:{width:'100%'},onClick:submit,disabled:loading},loading?'...':t.register),
+        React.createElement('div',{style:{textAlign:'center',marginTop:16,fontSize:13,color:'var(--text3)'}},t.hasAccount,' ',React.createElement('span',{style:{color:'var(--red)',cursor:'pointer',fontWeight:700},onClick:()=>nav('login')},t.login))
+      )
+    )
+  );
+}
+
+// ─── PROFILE PAGE ─────────────────────────────────────────────────────────────
+function ProfilePage({t,nav,currentUser,setCurrentUser}){
+  if(!currentUser){nav('login');return null;}
+  const [tab,setTab]=useState('info');
+  const [editBio,setEditBio]=useState(currentUser.bio||'');
+  const [editEmail,setEditEmail]=useState(currentUser.email||'');
+  const [saved,setSaved]=useState(false);
+  const [followedRappers,setFollowedRappers]=useState([]);
+  const [battles,setBattles]=useState([]);
+
+  useEffect(()=>{
+    GET('/follows').then(ids=>Promise.all(ids.map(id=>GET('/rappers/'+id)))).then(setFollowedRappers).catch(()=>{});
+    GET('/battles').then(bs=>setBattles(bs.filter(b=>b.rapper1===currentUser.username||b.rapper2===currentUser.username))).catch(()=>{});
+  },[]);
+
+  const save=async()=>{
+    try{
+      await PUT('/users/me/profile',{bio:editBio,email:editEmail});
+      setCurrentUser(u=>({...u,bio:editBio,email:editEmail}));
+      setSaved(true);setTimeout(()=>setSaved(false),2000);
+    }catch(e){alert(e.message);}
+  };
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'profile-header'},
+        React.createElement('div',{className:'profile-avatar'},currentUser.avatar||'👤'),
+        React.createElement('div',null,
+          React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12}},React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:40,letterSpacing:2}},currentUser.username),React.createElement(RoleBadge,{role:currentUser.role})),
+          React.createElement('div',{style:{color:'var(--text2)',fontSize:14,marginTop:4}},currentUser.email),
+          React.createElement('div',{style:{color:'var(--text3)',fontSize:13,marginTop:4}},'Joined: '+currentUser.joined)
+        )
+      ),
+      React.createElement('div',{className:'tabs'},
+        [[`info`,t.editProfile],[`followed`,t.followedRappers],['battles',t.battleHistory]].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
+      ),
+      tab==='info'&&React.createElement('div',{style:{maxWidth:480}},
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,t.bio),React.createElement('textarea',{className:'input-field',rows:4,value:editBio,onChange:e=>setEditBio(e.target.value)})),
+        React.createElement('div',{className:'form-group'},React.createElement('label',null,t.email),React.createElement('input',{className:'input-field',value:editEmail,onChange:e=>setEditEmail(e.target.value)})),
+        React.createElement('button',{className:'btn-primary',onClick:save},saved?'✓ Saved!':t.saveChanges)
+      ),
+      tab==='followed'&&React.createElement('div',null,followedRappers.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,t.noResults)):React.createElement('div',{className:'grid-auto'},followedRappers.map(r=>React.createElement(RapperCard,{key:r.id,rapper:r,t,nav})))),
+      tab==='battles'&&React.createElement('div',null,battles.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,t.noResults)):React.createElement('div',{className:'grid-auto'},battles.map(b=>React.createElement(BattleCard,{key:b.id,battle:b,t,nav}))))
+    )
+  );
+}
+
+// ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+function AdminPanel({t,nav,currentUser,settings,setSettings}){
+  const [tab,setTab]=useState('overview');
+  const [stats,setStats]=useState({});
+  const [users,setUsers]=useState([]);
+  const [battles,setBattles]=useState([]);
+  const [news,setNews]=useState([]);
+  const [reports,setReports]=useState([]);
+  const [rappers,setRappers]=useState([]);
+  const [msg,setMsg]=useState('');
+  const [newBattle,setNewBattle]=useState({title:'',rapper1:'',rapper2:'',round:'Round 1',status:'upcoming'});
+  const [newArticle,setNewArticle]=useState({title_en:'',title_ka:'',excerpt_en:'',excerpt_ka:'',category:'Battle News'});
+
+  const showMsg=(m)=>{setMsg(m);setTimeout(()=>setMsg(''),3000);};
+
+  useEffect(()=>{
+    GET('/stats').then(setStats).catch(()=>{});
+    GET('/users').then(setUsers).catch(()=>{});
+    GET('/battles').then(setBattles).catch(()=>{});
+    GET('/news').then(setNews).catch(()=>{});
+    GET('/reports').then(setReports).catch(()=>{});
+    GET('/rappers').then(setRappers).catch(()=>{});
+  },[]);
+
+  const banUser=async(id,banned)=>{await PUT('/users/'+id,{banned:!banned});setUsers(us=>us.map(u=>u.id===id?{...u,banned:!u.banned}:u));showMsg('Updated');};
+  const deleteUser=async(id)=>{if(id===1){showMsg('Cannot delete super admin');return;}if(!confirm('Delete user?'))return;await DEL('/users/'+id);setUsers(us=>us.filter(u=>u.id!==id));showMsg('Deleted');};
+  const changeRole=async(id,role)=>{await PUT('/users/'+id,{role});setUsers(us=>us.map(u=>u.id===id?{...u,role}:u));showMsg('Role updated');};
+  const toggleFeatured=async(id,featured)=>{await PUT('/battles/'+id,{featured:!featured});setBattles(bs=>bs.map(b=>b.id===id?{...b,featured:!b.featured}:b));};
+  const changeBattleStatus=async(id,status)=>{await PUT('/battles/'+id,{status});setBattles(bs=>bs.map(b=>b.id===id?{...b,status}:b));};
+  const deleteBattle=async(id)=>{await DEL('/battles/'+id);setBattles(bs=>bs.filter(b=>b.id!==id));showMsg('Deleted');};
+  const deleteNews_=async(id)=>{await DEL('/news/'+id);setNews(ns=>ns.filter(n=>n.id!==id));showMsg('Deleted');};
+  const resolveReport=async(id)=>{await PUT('/reports/'+id,{status:'resolved'});setReports(rs=>rs.map(r=>r.id===id?{...r,status:'resolved'}:r));showMsg('Resolved');};
+  const addBattle=async()=>{
+    if(!newBattle.title||!newBattle.rapper1||!newBattle.rapper2){showMsg('Fill all fields');return;}
+    const r1=rappers.find(r=>r.username===newBattle.rapper1);
+    const r2=rappers.find(r=>r.username===newBattle.rapper2);
+    const b=await POST('/battles',{...newBattle,rapper1_id:r1?.id||0,rapper2_id:r2?.id||0});
+    setBattles(bs=>[b,...bs]);setNewBattle({title:'',rapper1:'',rapper2:'',round:'Round 1',status:'upcoming'});showMsg('Battle added!');
+  };
+  const addArticle=async()=>{
+    if(!newArticle.title_en){showMsg('English title required');return;}
+    const a=await POST('/news',newArticle);
+    setNews(ns=>[a,...ns]);setNewArticle({title_en:'',title_ka:'',excerpt_en:'',excerpt_ka:'',category:'Battle News'});showMsg('Article added!');
+  };
+  const saveSettings=async(key,val)=>{
+    const updated={...settings,[key]:val};
+    await PUT('/settings',updated);setSettings(updated);showMsg('Saved');
+  };
+  const ROLES=['admin','moderator','designer','judge','battler','user'];
+
+  return React.createElement('div',{className:'page'},
+    React.createElement('div',{className:'admin-header'},
+      React.createElement('div',{className:'container'},
+        React.createElement('div',{className:'flex-between'},
+          React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:40,letterSpacing:3,background:'linear-gradient(90deg,#f00,#f70,#ff0,#0f0,#00f,#8b00ff,#f00)',backgroundSize:'400% 400%',animation:'rainbow 2s linear infinite',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}},t.adminPanel),
+          msg&&React.createElement('div',{style:{background:'rgba(0,255,135,.12)',border:'1px solid rgba(0,255,135,.3)',borderRadius:6,padding:'8px 16px',color:'var(--green)',fontSize:13,fontWeight:700}},'✓ '+msg)
+        )
+      )
+    ),
+    React.createElement('div',{className:'container',style:{paddingTop:24}},
+      React.createElement('div',{className:'tabs'},
+        [['overview',t.overview],['users',t.users],['battles',t.battles],['news',t.news],['reports',t.reports],['settings',t.settings]].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
+      ),
+      tab==='overview'&&React.createElement('div',null,
+        React.createElement('div',{className:'overview-grid'},
+          ...[[stats.users||0,t.totalUsers,'var(--cyan)','👥'],[stats.battles||0,t.totalBattles,'var(--red)','⚔️'],[stats.liveBattles||0,t.liveBattles2,'var(--green)','🔴'],[stats.news||0,t.totalNews,'#FF6B2B','📰'],[stats.pendingReports||0,t.pendingReports,'var(--gold)','🚨'],[stats.bannedUsers||0,t.bannedUsers,'var(--purple)','🚫'],[(stats.totalVotes||0).toLocaleString(),t.totalVotes,'var(--red)','🗳️'],[(stats.totalViews||0).toLocaleString(),t.totalViews,'var(--cyan)','👀']].map(([val,label,color,emoji])=>
+            React.createElement('div',{key:label,className:'stat-box'},React.createElement('div',{style:{fontSize:22,marginBottom:4}},emoji),React.createElement('div',{className:'stat-num',style:{color,fontSize:28}},val),React.createElement('div',{className:'stat-label'},label))
+          )
+        ),
+        React.createElement('div',{className:'card',style:{padding:20}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,letterSpacing:1,marginBottom:16}},t.roleDistribution),
+          ROLES.map(role=>{
+            const count=users.filter(u=>u.role===role).length;
+            const pct=users.length?Math.round(count/users.length*100):0;
+            return React.createElement('div',{key:role,style:{marginBottom:8}},
+              React.createElement('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:3}},React.createElement('span',{style:{fontSize:12,fontWeight:700,color:ROLE_COLORS[role]==='rainbow'?'#ff9900':ROLE_COLORS[role]}},role.toUpperCase()),React.createElement('span',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:'var(--text3)'}},count+' ('+pct+'%)')),
+              React.createElement('div',{style:{height:5,background:'var(--bg5)',borderRadius:3,overflow:'hidden'}},React.createElement('div',{style:{width:pct+'%',height:'100%',background:ROLE_COLORS[role]==='rainbow'?'linear-gradient(90deg,#f00,#f70,#ff0,#0f0,#00f)':ROLE_COLORS[role],borderRadius:3}}))
+            );
+          })
+        )
+      ),
+      tab==='users'&&React.createElement('div',{className:'card scroll-x'},
+        React.createElement('table',null,
+          React.createElement('thead',null,React.createElement('tr',null,...['ID','User','Email','Role','Status','Actions'].map(h=>React.createElement('th',{key:h},h)))),
+          React.createElement('tbody',null,users.map(u=>React.createElement('tr',{key:u.id},
+            React.createElement('td',{style:{fontFamily:'var(--font-mono)',color:'var(--text3)',fontSize:11}},u.id),
+            React.createElement('td',null,React.createElement('div',{style:{display:'flex',alignItems:'center',gap:8}},React.createElement('span',{style:{fontSize:18}},u.avatar||'👤'),React.createElement('span',{style:{fontWeight:700}},u.username))),
+            React.createElement('td',{style:{color:'var(--text2)',fontSize:12}},u.email),
+            React.createElement('td',null,u.id===1?React.createElement(RoleBadge,{role:'admin'}):React.createElement('select',{className:'input-field',style:{width:'auto',padding:'4px 8px',fontSize:12},value:u.role,onChange:e=>changeRole(u.id,e.target.value)},ROLES.map(r=>React.createElement('option',{key:r,value:r},r)))),
+            React.createElement('td',null,u.banned?React.createElement('span',{style:{color:'var(--red)',fontWeight:700,fontSize:12}},'BANNED'):React.createElement('span',{style:{color:'var(--green)',fontSize:12}},'Active')),
+            React.createElement('td',null,React.createElement('div',{style:{display:'flex',gap:6}},
+              React.createElement('button',{className:'btn-outline btn-xs',style:u.banned?{borderColor:'var(--green)',color:'var(--green)'}:{borderColor:'var(--gold)',color:'var(--gold)'},onClick:()=>banUser(u.id,u.banned)},u.banned?t.unbanUser:t.banUser),
+              u.id!==1&&React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:()=>deleteUser(u.id)},t.deleteUser)
+            ))
+          )))
+        )
+      ),
+      tab==='battles'&&React.createElement('div',null,
+        React.createElement('div',{className:'card',style:{padding:20,marginBottom:20}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:18,marginBottom:14}},t.addBattle),
+          React.createElement('div',{className:'grid-3'},
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Title'),React.createElement('input',{className:'input-field',value:newBattle.title,onChange:e=>setNewBattle(b=>({...b,title:e.target.value})),placeholder:'Battle Title'})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,t.rapper1||'Rapper 1'),React.createElement('select',{className:'input-field',value:newBattle.rapper1,onChange:e=>setNewBattle(b=>({...b,rapper1:e.target.value}))},React.createElement('option',{value:''},'Select...'),rappers.map(r=>React.createElement('option',{key:r.id,value:r.username},r.username)))),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,t.rapper2||'Rapper 2'),React.createElement('select',{className:'input-field',value:newBattle.rapper2,onChange:e=>setNewBattle(b=>({...b,rapper2:e.target.value}))},React.createElement('option',{value:''},'Select...'),rappers.map(r=>React.createElement('option',{key:r.id,value:r.username},r.username)))),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,t.round),React.createElement('input',{className:'input-field',value:newBattle.round,onChange:e=>setNewBattle(b=>({...b,round:e.target.value}))})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,t.status),React.createElement('select',{className:'input-field',value:newBattle.status,onChange:e=>setNewBattle(b=>({...b,status:e.target.value}))},['upcoming','live','finished'].map(s=>React.createElement('option',{key:s,value:s},s))))
+          ),
+          React.createElement('button',{className:'btn-primary',onClick:addBattle},t.addBattle)
+        ),
+        React.createElement('div',{className:'card scroll-x'},
+          React.createElement('table',null,
+            React.createElement('thead',null,React.createElement('tr',null,...['Title','Round','Status','Votes','Featured','Actions'].map(h=>React.createElement('th',{key:h},h)))),
+            React.createElement('tbody',null,battles.map(b=>React.createElement('tr',{key:b.id},
+              React.createElement('td',null,React.createElement('span',{style:{fontWeight:700,cursor:'pointer',color:'var(--red)'},onClick:()=>nav('battle',b.id)},b.title)),
+              React.createElement('td',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:'var(--text3)'}},b.round),
+              React.createElement('td',null,React.createElement('select',{className:'input-field',style:{width:'auto',padding:'4px 8px',fontSize:12},value:b.status,onChange:e=>changeBattleStatus(b.id,e.target.value)},['upcoming','live','finished'].map(s=>React.createElement('option',{key:s,value:s},s)))),
+              React.createElement('td',{style:{fontFamily:'var(--font-mono)',fontSize:12}},b.votes1+b.votes2),
+              React.createElement('td',null,React.createElement('button',{className:'btn-outline btn-xs',style:b.featured?{borderColor:'var(--gold)',color:'var(--gold)'}:{},onClick:()=>toggleFeatured(b.id,b.featured)},b.featured?'★':'☆')),
+              React.createElement('td',null,React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:()=>deleteBattle(b.id)},'✕'))
+            )))
+          )
+        )
+      ),
+      tab==='news'&&React.createElement('div',null,
+        React.createElement('div',{className:'card',style:{padding:20,marginBottom:20}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:18,marginBottom:14}},t.addNews),
+          React.createElement('div',{className:'grid-2'},
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Title (EN)'),React.createElement('input',{className:'input-field',value:newArticle.title_en,onChange:e=>setNewArticle(a=>({...a,title_en:e.target.value})),placeholder:'English title'})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Title (KA)'),React.createElement('input',{className:'input-field',value:newArticle.title_ka,onChange:e=>setNewArticle(a=>({...a,title_ka:e.target.value})),placeholder:'Georgian title'})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Excerpt (EN)'),React.createElement('input',{className:'input-field',value:newArticle.excerpt_en,onChange:e=>setNewArticle(a=>({...a,excerpt_en:e.target.value}))})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Excerpt (KA)'),React.createElement('input',{className:'input-field',value:newArticle.excerpt_ka,onChange:e=>setNewArticle(a=>({...a,excerpt_ka:e.target.value}))})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Category'),React.createElement('select',{className:'input-field',value:newArticle.category,onChange:e=>setNewArticle(a=>({...a,category:e.target.value}))},['Battle News','Rapper News','Platform News','Events'].map(c=>React.createElement('option',{key:c,value:c},c))))
+          ),
+          React.createElement('button',{className:'btn-primary',onClick:addArticle},t.addNews)
+        ),
+        React.createElement('div',{className:'card scroll-x'},
+          React.createElement('table',null,
+            React.createElement('thead',null,React.createElement('tr',null,...['ID','Title','Category','Author','Date','Actions'].map(h=>React.createElement('th',{key:h},h)))),
+            React.createElement('tbody',null,news.map(a=>React.createElement('tr',{key:a.id},
+              React.createElement('td',{style:{fontFamily:'var(--font-mono)',color:'var(--text3)',fontSize:11}},a.id),
+              React.createElement('td',null,React.createElement('span',{style:{fontWeight:700}},a.title_en)),
+              React.createElement('td',null,React.createElement('span',{style:{background:'var(--bg4)',border:'1px solid var(--border)',fontSize:10,padding:'2px 6px',borderRadius:3}},a.category)),
+              React.createElement('td',{style:{fontSize:12,color:'var(--text2)'}},a.author),
+              React.createElement('td',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:'var(--text3)'}},a.date),
+              React.createElement('td',null,React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:()=>deleteNews_(a.id)},'✕'))
+            )))
+          )
+        )
+      ),
+      tab==='reports'&&React.createElement('div',null,
+        React.createElement('div',{className:'grid-2 mb-16'},
+          React.createElement('div',{className:'stat-box'},React.createElement('div',{className:'stat-num',style:{color:'var(--gold)'}},reports.filter(r=>r.status==='pending').length),React.createElement('div',{className:'stat-label'},t.pendingReports)),
+          React.createElement('div',{className:'stat-box'},React.createElement('div',{className:'stat-num',style:{color:'var(--green)'}},reports.filter(r=>r.status==='resolved').length),React.createElement('div',{className:'stat-label'},'Resolved'))
+        ),
+        React.createElement('div',{className:'card scroll-x'},
+          React.createElement('table',null,
+            React.createElement('thead',null,React.createElement('tr',null,...['Reporter','Reported','Reason','Date','Status','Actions'].map(h=>React.createElement('th',{key:h},h)))),
+            React.createElement('tbody',null,reports.map(r=>React.createElement('tr',{key:r.id},
+              React.createElement('td',{style:{color:'var(--cyan)',fontSize:12}},r.reporter),
+              React.createElement('td',{style:{color:'var(--red)',fontWeight:700}},r.reported),
+              React.createElement('td',{style:{fontSize:12,color:'var(--text2)'}},r.reason),
+              React.createElement('td',{style:{fontFamily:'var(--font-mono)',fontSize:11,color:'var(--text3)'}},r.date),
+              React.createElement('td',null,React.createElement('span',{style:{fontSize:11,fontWeight:700,color:r.status==='pending'?'var(--gold)':'var(--green)'}},r.status.toUpperCase())),
+              r.status==='pending'?React.createElement('td',null,React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--green)',color:'var(--green)'},onClick:()=>resolveReport(r.id)},t.resolve)):React.createElement('td',null,'—')
+            )))
+          )
+        )
+      ),
+      tab==='settings'&&React.createElement('div',{style:{maxWidth:600}},
+        React.createElement('div',{className:'card',style:{padding:24,marginBottom:16}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,marginBottom:20}},'General Settings'),
+          React.createElement('div',{className:'form-group'},React.createElement('label',null,'Site Name'),React.createElement('input',{className:'input-field',defaultValue:settings.siteName,onBlur:e=>saveSettings('siteName',e.target.value)})),
+          React.createElement('div',{className:'form-group'},React.createElement('label',null,'Season Text'),React.createElement('input',{className:'input-field',defaultValue:settings.seasonText,onBlur:e=>saveSettings('seasonText',e.target.value)}))
+        ),
+        React.createElement('div',{className:'card',style:{padding:24,marginBottom:16}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,marginBottom:20}},'Feature Flags'),
+          ...[['registrationOpen',t.registrationOpen],['chatEnabled',t.chatEnabled],['maintenanceMode',t.maintenanceMode]].map(([key,label])=>
+            React.createElement('div',{key,style:{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'12px 0',borderBottom:'1px solid var(--border)'}},
+              React.createElement('div',null,React.createElement('div',{style:{fontWeight:700}},label),React.createElement('div',{style:{fontSize:12,color:'var(--text3)'}},settings[key]?'Enabled':'Disabled')),
+              React.createElement('label',{className:'toggle'},React.createElement('input',{type:'checkbox',checked:!!settings[key],onChange:e=>saveSettings(key,e.target.checked)}),React.createElement('span',{className:'slider'}))
+            )
+          )
+        ),
+        React.createElement('div',{className:'card',style:{padding:24,border:'1px solid rgba(255,45,85,.3)',background:'rgba(255,45,85,.03)'}},
+          React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,color:'var(--red)',marginBottom:8}},t.dangerZone),
+          React.createElement('p',{style:{color:'var(--text2)',fontSize:13,marginBottom:16}},'Reset all platform data. Cannot be undone.'),
+          React.createElement('button',{className:'btn-danger',onClick:async()=>{if(confirm('RESET ALL DATA? This cannot be undone.')){try{await fetch('/api/admin/reset',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+getToken()}});setStats({});setBattles([]);setNews([]);setReports([]);showMsg('All data reset!');}catch(e){showMsg('Error: '+e.message);}}}},t.resetPlatform)
+        )
+      )
+    )
+  );
+}
+
+// ─── MOD PANEL ────────────────────────────────────────────────────────────────
+function ModPanel({t,currentUser}){
+  const [tab,setTab]=useState('reports');
+  const [reports,setReports]=useState([]);
+  const [chatLog,setChatLog]=useState([]);
+  const [bannedUsers,setBannedUsers]=useState([]);
+  const [msg,setMsg]=useState('');
+  const showMsg=(m)=>{setMsg(m);setTimeout(()=>setMsg(''),2500);};
+
+  useEffect(()=>{
+    GET('/reports').then(setReports).catch(()=>{});
+    GET('/chat').then(setChatLog).catch(()=>{});
+    GET('/users').then(us=>setBannedUsers(us.filter(u=>u.banned))).catch(()=>{});
+  },[]);
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},React.createElement('span',{style:{background:'var(--orange)',width:8,height:40,borderRadius:2,display:'block'}}),React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:36,letterSpacing:2,color:'#FF6B2B'}},t.modPanel)),
+      msg&&React.createElement('div',{style:{background:'rgba(0,255,135,.1)',border:'1px solid rgba(0,255,135,.3)',borderRadius:6,padding:'8px 16px',color:'var(--green)',fontSize:13,marginBottom:16}},'✓ '+msg),
+      React.createElement('div',{className:'tabs'},
+        [['reports','Reports'],['chatLog',t.chatLog],['banned',t.bannedUsersTab||'Banned Users']].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
+      ),
+      tab==='reports'&&React.createElement('div',{className:'card scroll-x'},
+        React.createElement('table',null,
+          React.createElement('thead',null,React.createElement('tr',null,...['Reporter','Reported','Reason','Status','Action'].map(h=>React.createElement('th',{key:h},h)))),
+          React.createElement('tbody',null,reports.map(r=>React.createElement('tr',{key:r.id},
+            React.createElement('td',null,r.reporter),React.createElement('td',{style:{fontWeight:700,color:'var(--red)'}},r.reported),
+            React.createElement('td',{style:{fontSize:12,color:'var(--text2)'}},r.reason),
+            React.createElement('td',null,React.createElement('span',{style:{fontSize:11,fontWeight:700,color:r.status==='pending'?'var(--gold)':'var(--green)'}},r.status.toUpperCase())),
+            r.status==='pending'?React.createElement('td',null,React.createElement('button',{className:'btn-success btn-xs',onClick:async()=>{await PUT('/reports/'+r.id,{status:'resolved'});setReports(rs=>rs.map(x=>x.id===r.id?{...x,status:'resolved'}:x));showMsg('Resolved');}},t.resolve)):React.createElement('td',null,'—')
+          )))
+        )
+      ),
+      tab==='chatLog'&&React.createElement('div',{className:'card',style:{padding:14,maxHeight:500,overflowY:'auto'}},
+        chatLog.map(m=>React.createElement('div',{key:m.id,style:{display:'flex',gap:8,alignItems:'center',padding:'6px 0',borderBottom:'1px solid var(--border)'}},
+          React.createElement('span',{style:{fontSize:14}},m.avatar||m.username?.[0]),
+          React.createElement('span',{style:{fontWeight:700,color:ROLE_COLORS[m.role]||'var(--cyan)',fontSize:12}},m.username),
+          React.createElement(RoleBadge,{role:m.role}),
+          React.createElement('span',{style:{fontSize:13,flex:1,color:'var(--text2)'}},m.text),
+          React.createElement('span',{style:{fontSize:10,color:'var(--text3)',fontFamily:'var(--font-mono)'}},m.time),
+          React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:async()=>{await DEL('/chat/'+m.id);setChatLog(ms=>ms.filter(x=>x.id!==m.id));}},t.delete)
+        ))
+      ),
+      tab==='banned'&&(bannedUsers.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,'No banned users')):
+        React.createElement('div',{className:'card scroll-x'},
+          React.createElement('table',null,
+            React.createElement('thead',null,React.createElement('tr',null,...['User','Email','Role','Action'].map(h=>React.createElement('th',{key:h},h)))),
+            React.createElement('tbody',null,bannedUsers.map(u=>React.createElement('tr',{key:u.id},
+              React.createElement('td',null,React.createElement('div',{style:{display:'flex',gap:6,alignItems:'center'}},React.createElement('span',null,u.avatar),React.createElement('span',{style:{fontWeight:700}},u.username))),
+              React.createElement('td',{style:{fontSize:12,color:'var(--text2)'}},u.email),
+              React.createElement('td',null,React.createElement(RoleBadge,{role:u.role})),
+              React.createElement('td',null,React.createElement('button',{className:'btn-success btn-xs',onClick:async()=>{await PUT('/users/'+u.id,{banned:false});setBannedUsers(us=>us.filter(x=>x.id!==u.id));showMsg('Unbanned '+u.username);}},t.unbanUser))
+            )))
+          )
+        )
+      )
+    )
+  );
+}
+
+// ─── DESIGNER PANEL ───────────────────────────────────────────────────────────
+function DesignerPanelPage({t,nav}){
+  const [banners,setBanners]=useState([]);
+  const [tab,setTab]=useState('banners');
+  const [msg,setMsg]=useState('');
+  const [newBanner,setNewBanner]=useState({title:'',emoji:'🎤',color:'linear-gradient(135deg,#1a0505,#05051a)'});
+  const showMsg=(m)=>{setMsg(m);setTimeout(()=>setMsg(''),2500);};
+  const GALLERY=['🎤','🔥','🎵','💥','🏆','👑','⚡','🎧','🎶','🌟','💎','🎯'];
+  const COLORS=['linear-gradient(135deg,#1a0505,#05051a)','linear-gradient(135deg,#051a05,#0a0a1a)','linear-gradient(135deg,#05051a,#1a0505)','linear-gradient(135deg,#1a1a05,#050a1a)','linear-gradient(135deg,#1a0a1a,#0a1a0a)'];
+
+  useEffect(()=>{GET('/banners').then(setBanners).catch(()=>{});},[]);
+
+  const addBanner=async()=>{if(!newBanner.title)return;const b=await POST('/banners',newBanner);setBanners(bs=>[...bs,b]);setNewBanner({title:'',emoji:'🎤',color:COLORS[0]});showMsg('Banner added!');};
+  const setActive=async(id,active)=>{await PUT('/banners/'+id,{active:!active});setBanners(bs=>bs.map(x=>({...x,active:x.id===id?!x.active:false})));};
+  const delBanner=async(id)=>{await DEL('/banners/'+id);setBanners(bs=>bs.filter(x=>x.id!==id));};
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},React.createElement('span',{style:{background:'var(--purple)',width:8,height:40,borderRadius:2,display:'block'}}),React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:36,letterSpacing:2,color:'#B44FFF'}},t.designerPanel)),
+      msg&&React.createElement('div',{style:{background:'rgba(180,79,255,.1)',border:'1px solid rgba(180,79,255,.3)',borderRadius:6,padding:'8px 16px',color:'#B44FFF',fontSize:13,marginBottom:16}},'✓ '+msg),
+      React.createElement('div',{className:'tabs'},[['banners',t.banners],['gallery',t.gallery]].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))),
+      tab==='banners'&&React.createElement('div',null,
+        React.createElement('div',{className:'card',style:{padding:20,marginBottom:20}},
+          React.createElement('div',{className:'grid-3'},
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Title'),React.createElement('input',{className:'input-field',value:newBanner.title,onChange:e=>setNewBanner(b=>({...b,title:e.target.value})),placeholder:'Banner title'})),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Emoji'),React.createElement('select',{className:'input-field',value:newBanner.emoji,onChange:e=>setNewBanner(b=>({...b,emoji:e.target.value}))},GALLERY.map(e=>React.createElement('option',{key:e,value:e},e)))),
+            React.createElement('div',{className:'form-group'},React.createElement('label',null,'Theme'),React.createElement('select',{className:'input-field',value:newBanner.color,onChange:e=>setNewBanner(b=>({...b,color:e.target.value}))},COLORS.map((c,i)=>React.createElement('option',{key:i,value:c},'Theme '+(i+1)))))
+          ),
+          React.createElement('button',{className:'btn-primary',style:{background:'#B44FFF'},onClick:addBanner},t.addBanner)
+        ),
+        React.createElement('div',{className:'grid-3'},
+          banners.map(b=>React.createElement('div',{key:b.id,className:'card',style:{overflow:'hidden'}},
+            React.createElement('div',{style:{background:b.color,padding:'24px 16px',textAlign:'center',borderBottom:'1px solid var(--border)'}},React.createElement('div',{style:{fontSize:36,marginBottom:8}},b.emoji),React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:18,letterSpacing:1}},b.title)),
+            React.createElement('div',{style:{padding:12,display:'flex',gap:8,justifyContent:'flex-end'}},
+              React.createElement('button',{className:'btn-outline btn-xs',style:b.active?{borderColor:'var(--green)',color:'var(--green)'}:{},onClick:()=>setActive(b.id,b.active)},b.active?'✓ Active':'Set Active'),
+              React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:()=>delBanner(b.id)},'✕')
+            )
+          ))
+        )
+      ),
+      tab==='gallery'&&React.createElement('div',{style:{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(100px,1fr))',gap:10}},
+        GALLERY.map((e,i)=>React.createElement('div',{key:i,style:{background:'var(--bg4)',border:'1px solid var(--border)',borderRadius:8,padding:'20px 12px',textAlign:'center',fontSize:36,cursor:'pointer',transition:'border-color .2s'},onMouseEnter:ev=>ev.currentTarget.style.borderColor='#B44FFF',onMouseLeave:ev=>ev.currentTarget.style.borderColor='var(--border)'},e))
+      )
+    )
+  );
+}
+
+// ─── JUDGE PANEL ──────────────────────────────────────────────────────────────
+function JudgePanelPage({t,currentUser}){
+  const [battles,setBattles]=useState([]);
+  const [selected,setSelected]=useState(null);
+  const [judgeScores,setJudgeScores]=useState({technique1:5,delivery1:5,content1:5,technique2:5,delivery2:5,content2:5});
+  const [allScores,setAllScores]=useState([]);
+  const [submitted,setSubmitted]=useState(false);
+
+  useEffect(()=>{GET('/battles').then(bs=>{const live=bs.filter(b=>b.status==='live');setBattles(live);if(live.length)setSelected(live[0].id);}).catch(()=>{});},[]);
+  useEffect(()=>{if(selected) GET('/scores/'+selected).then(setAllScores).catch(()=>{});},[selected]);
+
+  const battle=battles.find(b=>b.id===selected);
+  const avg=(a,b,c)=>((a+b+c)/3).toFixed(1);
+
+  const submit=async()=>{
+    if(!battle) return;
+    await POST('/scores',{battle_id:battle.id,...judgeScores});
+    setSubmitted(true);setTimeout(()=>setSubmitted(false),3000);
+    GET('/scores/'+selected).then(setAllScores).catch(()=>{});
+  };
+
+  return React.createElement('div',{className:'page',style:{padding:'32px 0'}},
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{style:{display:'flex',alignItems:'center',gap:12,marginBottom:24}},React.createElement('span',{style:{background:'var(--gold)',width:8,height:40,borderRadius:2,display:'block'}}),React.createElement('h1',{style:{fontFamily:'var(--font-display)',fontSize:36,letterSpacing:2,color:'var(--gold)'}},t.judgePanel)),
+      battles.length===0?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,'No live battles to judge')):
+      React.createElement('div',{className:'grid-2'},
+        React.createElement('div',null,
+          React.createElement('div',{className:'form-group'},React.createElement('label',null,'Select Battle'),React.createElement('select',{className:'input-field',value:selected||'',onChange:e=>setSelected(Number(e.target.value))},battles.map(b=>React.createElement('option',{key:b.id,value:b.id},b.title)))),
+          battle&&React.createElement('div',{className:'card',style:{padding:20}},
+            React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,textAlign:'center',marginBottom:20}},battle.title),
+            ...[['technique1',t.technique,battle.rapper1],['delivery1',t.delivery,battle.rapper1],['content1',t.contentScore,battle.rapper1],['technique2',t.technique,battle.rapper2],['delivery2',t.delivery,battle.rapper2],['content2',t.contentScore,battle.rapper2]].map(([key,label,rapper])=>
+              React.createElement('div',{key,style:{marginBottom:14}},
+                React.createElement('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:4}},React.createElement('label',{style:{display:'inline',fontSize:12}},rapper+' — '+label),React.createElement('span',{style:{fontFamily:'var(--font-mono)',color:'var(--gold)',fontWeight:700}},judgeScores[key]+'/10')),
+                React.createElement('input',{type:'range',min:1,max:10,value:judgeScores[key],onChange:e=>setJudgeScores(s=>({...s,[key]:Number(e.target.value)})),style:{width:'100%',accentColor:'var(--gold)'}})
+              )
+            ),
+            React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:12,marginTop:8,marginBottom:14}},
+              React.createElement('div',{style:{textAlign:'center',background:'rgba(255,45,85,.08)',borderRadius:6,padding:10}},React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:28,color:'var(--red)'}},avg(judgeScores.technique1,judgeScores.delivery1,judgeScores.content1)),React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},battle.rapper1+' AVG')),
+              React.createElement('div',{style:{textAlign:'center',background:'rgba(0,212,255,.08)',borderRadius:6,padding:10}},React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:28,color:'var(--cyan)'}},avg(judgeScores.technique2,judgeScores.delivery2,judgeScores.content2)),React.createElement('div',{style:{fontSize:11,color:'var(--text3)'}},battle.rapper2+' AVG'))
+            ),
+            React.createElement('button',{className:'btn-gold',style:{width:'100%'},onClick:submit},submitted?'✓ '+t.scored:t.submitScore)
+          )
+        ),
+        React.createElement('div',null,
+          React.createElement('div',{className:'card',style:{padding:20}},
+            React.createElement('div',{style:{fontFamily:'var(--font-display)',fontSize:20,marginBottom:14}},t.scoreboard),
+            allScores.length===0?React.createElement('div',{style:{color:'var(--text3)',fontSize:12}},'No scores yet for this battle'):
+            allScores.map(s=>React.createElement('div',{key:s.id,style:{padding:'10px 0',borderBottom:'1px solid var(--border)'}},
+              React.createElement('div',{style:{fontFamily:'var(--font-mono)',fontSize:10,color:'var(--text3)',marginBottom:6}},'Judge #'+s.judge_id),
+              React.createElement('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8}},
+                React.createElement('div',{style:{fontSize:12,color:'var(--red)'}},battle?.rapper1+': '+avg(s.technique1,s.delivery1,s.content1)+' avg'),
+                React.createElement('div',{style:{fontSize:12,color:'var(--cyan)'}},battle?.rapper2+': '+avg(s.technique2,s.delivery2,s.content2)+' avg')
+              )
+            ))
+          )
+        )
+      )
+    )
+  );
+}
+
+// ─── FOOTER ───────────────────────────────────────────────────────────────────
+function Footer({t,nav,settings,designConfig}){
+  return React.createElement('footer',null,
+    React.createElement('div',{className:'container'},
+      React.createElement('div',{className:'footer-inner'},
+        React.createElement('div',null,
+          React.createElement('div',{className:'footer-logo'},settings.siteName||'FLOW & BARS'),
+          React.createElement('div',{style:{fontSize:11,color:'var(--text3)',marginTop:4,letterSpacing:1}},settings.seasonText)
+        ),
+        React.createElement('div',{style:{display:'flex',gap:16}},
+          ...[['home',t.home],['battles',t.battles],['rappers',t.rappers],['leaderboard',t.leaderboard]].map(([pg,label])=>React.createElement('span',{key:pg,className:'footer-link',onClick:()=>nav(pg)},label))
+        ),
+        React.createElement('div',{style:{textAlign:'right'}},
+          React.createElement('div',{style:{fontSize:11,color:'var(--text3)',letterSpacing:.5}},'🇬🇪 '+(designConfig?.footerText||"Georgia's #1 Rap Platform")),
+          React.createElement('div',{style:{fontSize:11,color:'var(--text3)',marginTop:2}},'© '+new Date().getFullYear()+' Flow & Bars')
+        )
+      )
+    )
+  );
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+ReactDOM.createRoot(document.getElementById('app')).render(React.createElement(App));
+</script>
+</body>
+</html>
