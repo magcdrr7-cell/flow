@@ -177,8 +177,24 @@ app.put('/api/users/:id',auth,adminOnly,(req,res)=>{
   const id=Number(req.params.id);
   const {role,banned,bio,email,avatar}=req.body;
   if(id===1&&role&&role!=='admin') return res.status(403).json({error:'Cannot demote super admin'});
+
+  // Get current user state before update
+  const user=db.prepare('SELECT * FROM users WHERE id=?').get(id);
+  if(!user) return res.status(404).json({error:'User not found'});
+
   db.prepare(`UPDATE users SET role=COALESCE(?,role),banned=COALESCE(?,banned),bio=COALESCE(?,bio),email=COALESCE(?,email),avatar=COALESCE(?,avatar) WHERE id=?`)
     .run(role??null,banned!==undefined?(banned?1:0):null,bio??null,email??null,avatar??null,id);
+
+  // Auto-sync rappers table when battler role changes
+  if(role==='battler'){
+    // Add to rappers if not already there
+    db.prepare(`INSERT OR IGNORE INTO rappers(username,real_name,city,emoji,bio,style)VALUES(?,?,?,?,?,?)`)
+      .run(user.username,'','',(user.avatar||'🎤'),user.bio||'','');
+  } else if(role&&role!=='battler'&&user.role==='battler'){
+    // Remove from rappers when role is taken away
+    db.prepare('DELETE FROM rappers WHERE username=?').run(user.username);
+  }
+
   res.json({success:true});
 });
 app.delete('/api/users/:id',auth,adminOnly,(req,res)=>{
