@@ -13,7 +13,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'flowbars-2026-secret';
 // ─── DATABASE ─────────────────────────────────────────────────────────────────
 const db = new Database(path.join(__dirname, 'database.db'));
 
-// Initialize tables so the frontend queries don't crash
+// Initialize all tables needed by the frontend
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,15 +26,15 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS news (id INTEGER PRIMARY KEY AUTOINCREMENT, title_en TEXT, title_ka TEXT, excerpt_en TEXT, excerpt_ka TEXT, content TEXT, category TEXT, author TEXT, date TEXT, emoji TEXT);
   CREATE TABLE IF NOT EXISTS banners (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, emoji TEXT, color TEXT, active INTEGER DEFAULT 0);
   CREATE TABLE IF NOT EXISTS chat_messages (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, username TEXT, role TEXT, avatar TEXT, text TEXT, time TEXT, is_ai INTEGER DEFAULT 0);
-  CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, reporter TEXT, reported TEXT, reason TEXT, status TEXT DEFAULT 'pending', date TEXT);
 `);
 
-// Seed Admin if not exists
-const admin = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
-if (!admin) {
+// Seed Admin if not exists (User: admin | Pass: Admin@123)
+const adminExists = db.prepare('SELECT * FROM users WHERE username = ?').get('admin');
+if (!adminExists) {
     const hash = bcrypt.hashSync('Admin@123', 10);
     db.prepare('INSERT INTO users (username, password, role, joined) VALUES (?,?,?,?)')
       .run('admin', hash, 'admin', new Date().toISOString().slice(0, 10));
+    console.log("✅ Admin user created: admin / Admin@123");
 }
 
 // ─── MIDDLEWARE ──────────────────────────────────────────────────────────────
@@ -54,61 +54,76 @@ function authMiddleware(req, res, next) {
     } catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-// ─── ROUTES ──────────────────────────────────────────────────────────────────
+// ─── AUTH ROUTES ──────────────────────────────────────────────────────────────
 
-// Auth
+// Login
 app.post('/api/auth/login', (req, res) => {
     const { username, password } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
+
     const user = db.prepare('SELECT * FROM users WHERE username=?').get(username);
-    if (!user || !bcrypt.compareSync(password, user.password)) return res.status(401).json({ error: 'Invalid credentials' });
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+        return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
     const token = jwt.sign({ id: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '7d' });
-    res.json({ token, user: { username: user.username, role: user.role } });
+    res.json({ token, user: { username: user.username, role: user.role, avatar: user.avatar } });
+});
+
+// Register
+app.post('/api/auth/register', (req, res) => {
+    const { username, password, email } = req.body;
+    if (!username || !password) return res.status(400).json({ error: 'Username and password required' });
+
+    try {
+        const hash = bcrypt.hashSync(password, 10);
+        const info = db.prepare('INSERT INTO users (username, password, email, joined) VALUES (?,?,?,?)')
+          .run(username, hash, email || '', new Date().toISOString().slice(0, 10));
+        
+        const token = jwt.sign({ id: info.lastInsertRowid, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+        res.json({ token, user: { username, role: 'user' } });
+    } catch (err) {
+        if (err.message.includes('UNIQUE')) return res.status(400).json({ error: 'Username already taken' });
+        res.status(500).json({ error: 'Server error during registration' });
+    }
 });
 
 app.get('/api/auth/me', authMiddleware, (req, res) => {
-    res.json({ username: req.user.username, role: req.user.role, email: req.user.email, bio: req.user.bio, joined: req.user.joined, avatar: req.user.avatar });
+    res.json({ username: req.user.username, role: req.user.role, bio: req.user.bio, avatar: req.user.avatar });
 });
 
-// Admin & Stats
-app.get('/api/admin/users', authMiddleware, (req, res) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
-    const users = db.prepare('SELECT id, username, email, role, joined, banned FROM users').all();
-    res.json(users);
-});
+// ─── CONTENT ROUTES ───────────────────────────────────────────────────────────
 
 app.get('/api/stats', (req, res) => {
-    const usersCount = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
-    const battlesCount = db.prepare('SELECT COUNT(*) as c FROM battles').get().c;
-    res.json({ users: usersCount, battles: battlesCount, liveBattles: 0, totalVotes: 0, totalViews: 0, news: 0, pendingReports: 0, bannedUsers: 0 });
+    const users = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
+    const battles = db.prepare('SELECT COUNT(*) as c FROM battles').get().c;
+    const rappers = db.prepare('SELECT COUNT(*) as c FROM rappers').get().c;
+    const news = db.prepare('SELECT COUNT(*) as c FROM news').get().c;
+    res.json({ users, battles, rappers, news, liveBattles: 0, totalVotes: 0 });
 });
 
-// App Settings & Design
 app.get('/api/settings', (req, res) => {
-    res.json({ maintenanceMode: false, registrationOpen: true, chatEnabled: true, siteName: 'Flow & Bars', seasonText: 'Season 3' });
+    res.json({ siteName: 'Flow & Bars', seasonText: 'Season 3', registrationOpen: true });
 });
 
 app.get('/api/design', (req, res) => {
-    res.json({ 
-        colors: { primary: '#FF2D55', accent: '#00D4FF', gold: '#FFD700', bg: '#070707', text: '#e8e8e8' }, 
-        sections: { hero: true, statBar: true, battles: true, rappers: true, news: true } 
-    });
+    res.json({ colors: { primary: '#FF2D55', bg: '#070707' }, sections: { hero: true, battles: true, rappers: true } });
 });
 
-// Primary Entities
+// Generic Fetchers
 app.get('/api/battles', (req, res) => res.json(db.prepare('SELECT * FROM battles').all()));
 app.get('/api/rappers', (req, res) => res.json(db.prepare('SELECT * FROM rappers').all()));
 app.get('/api/news', (req, res) => res.json(db.prepare('SELECT * FROM news').all()));
 app.get('/api/banners', (req, res) => res.json(db.prepare('SELECT * FROM banners').all()));
-app.get('/api/chat', (req, res) => res.json(db.prepare('SELECT * FROM chat_messages').all()));
-app.get('/api/reports', (req, res) => res.json(db.prepare('SELECT * FROM reports').all()));
 
-// --- API CATCH-ALL ---
-// Crucial fix: Returns a proper JSON error if an API route is missing, avoiding the HTML parsing error.
+// ─── ERROR HANDLING ───────────────────────────────────────────────────────────
+
+// Catch-all for API (prevents the HTML/JSON error)
 app.use('/api/*', (req, res) => {
-    res.status(404).json({ error: 'API endpoint not found' });
+    res.status(404).json({ error: `Route ${req.originalUrl} not found on this server` });
 });
 
-// ─── FRONTEND FALLBACK ───────────────────────────────────────────────────────
+// Frontend
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
-app.listen(PORT, () => console.log(`🚀 Server on http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
