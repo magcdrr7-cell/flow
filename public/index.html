@@ -1089,6 +1089,23 @@ function ProfilePage({t,nav,currentUser,setCurrentUser}){
 }
 
 // ─── ADMIN PANEL ──────────────────────────────────────────────────────────────
+
+function RapperEditRow({rapper,onSave,onDelete}){
+  const [d,setD]=useState({city:rapper.city||'',style:rapper.style||'',wins:rapper.wins||0,losses:rapper.losses||0,pts:rapper.pts||0,bio:rapper.bio||''});
+  const inp=(field,type='text')=>React.createElement('input',{className:'input-field',type,value:d[field],onChange:e=>setD(x=>({...x,[field]:type==='number'?Number(e.target.value):e.target.value})),style:{width:type==='number'?70:120,padding:'4px 6px',fontSize:12}});
+  return React.createElement('tr',null,
+    React.createElement('td',null,React.createElement('div',{style:{display:'flex',alignItems:'center',gap:6}},React.createElement('span',{style:{fontSize:20}},rapper.emoji||'🎤'),React.createElement('span',{style:{fontWeight:700}},rapper.username))),
+    React.createElement('td',null,inp('city')),
+    React.createElement('td',null,inp('style')),
+    React.createElement('td',null,inp('wins','number')),
+    React.createElement('td',null,inp('losses','number')),
+    React.createElement('td',null,inp('pts','number')),
+    React.createElement('td',null,inp('bio')),
+    React.createElement('td',null,React.createElement('button',{className:'btn-success btn-xs',onClick:()=>onSave(rapper.id,d)},'💾 Save')),
+    React.createElement('td',null,React.createElement('button',{className:'btn-outline btn-xs',style:{borderColor:'var(--red)',color:'var(--red)'},onClick:()=>onDelete(rapper.id)},'✕'))
+  );
+}
+
 function AdminPanel({t,nav,currentUser,settings,setSettings}){
   const [tab,setTab]=useState('overview');
   const [stats,setStats]=useState({});
@@ -1149,7 +1166,7 @@ function AdminPanel({t,nav,currentUser,settings,setSettings}){
     ),
     React.createElement('div',{className:'container',style:{paddingTop:24}},
       React.createElement('div',{className:'tabs'},
-        [['overview',t.overview],['users',t.users],['battles',t.battles],['news',t.news],['reports',t.reports],['settings',t.settings]].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
+        [['overview',t.overview],['users',t.users],['rappers','Rappers'],['battles',t.battles],['news',t.news],['reports',t.reports],['settings',t.settings]].map(([key,label])=>React.createElement('button',{key,className:'tab'+(tab===key?' active':''),onClick:()=>setTab(key)},label))
       ),
       tab==='overview'&&React.createElement('div',null,
         React.createElement('div',{className:'overview-grid'},
@@ -1184,6 +1201,19 @@ function AdminPanel({t,nav,currentUser,settings,setSettings}){
             ))
           )))
         )
+      ),
+      tab==='rappers'&&React.createElement('div',null,
+        rappers.length===0
+          ?React.createElement('div',{className:'empty-state'},React.createElement('h3',null,'No Rappers Yet'),React.createElement('p',{style:{fontSize:13,marginTop:8,color:'var(--text3)'}},'Assign the Battler role to a user — they appear here automatically.'))
+          :React.createElement('div',{className:'card scroll-x'},
+              React.createElement('table',null,
+                React.createElement('thead',null,React.createElement('tr',null,...['Rapper','City','Style','Wins','Losses','PTS','Bio','Save','Remove'].map(h=>React.createElement('th',{key:h},h)))),
+                React.createElement('tbody',null,rappers.map(r=>React.createElement(RapperEditRow,{key:r.id,rapper:r,
+                  onSave:async(id,data)=>{await PUT('/rappers/'+id,data);setRappers(rs=>rs.map(x=>x.id===id?{...x,...data}:x));showMsg('Stats saved!');},
+                  onDelete:async(id)=>{if(!confirm('Remove rapper?'))return;await DEL('/rappers/'+id);setRappers(rs=>rs.filter(x=>x.id!==id));showMsg('Removed');}
+                })))
+              )
+            )
       ),
       tab==='battles'&&React.createElement('div',null,
         React.createElement('div',{className:'card',style:{padding:20,marginBottom:20}},
