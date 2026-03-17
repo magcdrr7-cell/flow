@@ -13,12 +13,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'flowbars';
 const ADMIN_IP = process.env.ADMIN_IP || '176.74.94.221';
 
 // ─── RAILWAY PROXY FIX ────────────────────────────────────────────────────────
-// This tells Express to trust the Railway load balancer
 app.set('trust proxy', 1);
 
 // ─── DATABASE ─────────────────────────────────────────────────────────────────
-// On Railway, you should use a Volume. Change 'database.db' to '/data/database.db'
-// if you attach a volume to /data in the project settings.
+// Tip: If you use a Railway Volume, use: new Database('/data/database.db');
 const db = new Database(path.join(__dirname, 'database.db'));
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
@@ -42,10 +40,6 @@ db.exec(`
     status TEXT DEFAULT 'upcoming', round TEXT, votes1 INTEGER DEFAULT 0, votes2 INTEGER DEFAULT 0,
     views INTEGER DEFAULT 0, featured INTEGER DEFAULT 0, date TEXT, winner TEXT
   );
-  CREATE TABLE IF NOT EXISTS battle_comments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, battle_id INTEGER, user_id INTEGER,
-    username TEXT, role TEXT, avatar TEXT, text TEXT, created_at TEXT
-  );
   CREATE TABLE IF NOT EXISTS news (
     id INTEGER PRIMARY KEY AUTOINCREMENT, title_en TEXT, title_ka TEXT,
     excerpt_en TEXT, excerpt_ka TEXT, content TEXT DEFAULT '',
@@ -55,63 +49,21 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER, username TEXT,
     role TEXT, avatar TEXT, text TEXT, time TEXT, is_ai INTEGER DEFAULT 0, created_at TEXT
   );
-  CREATE TABLE IF NOT EXISTS reports (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, reporter TEXT, reported TEXT,
-    reason TEXT, status TEXT DEFAULT 'pending', date TEXT
-  );
-  CREATE TABLE IF NOT EXISTS banners (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT, emoji TEXT, color TEXT, active INTEGER DEFAULT 0
-  );
+  CREATE TABLE IF NOT EXISTS votes ( user_id INTEGER, battle_id INTEGER, side TEXT, PRIMARY KEY (user_id, battle_id) );
   CREATE TABLE IF NOT EXISTS settings ( key TEXT PRIMARY KEY, value TEXT );
   CREATE TABLE IF NOT EXISTS design_config ( key TEXT PRIMARY KEY, value TEXT );
-  CREATE TABLE IF NOT EXISTS votes ( user_id INTEGER, battle_id INTEGER, side TEXT, PRIMARY KEY (user_id, battle_id) );
-  CREATE TABLE IF NOT EXISTS follows ( user_id INTEGER, rapper_id INTEGER, PRIMARY KEY (user_id, rapper_id) );
-  CREATE TABLE IF NOT EXISTS scores (
-    id INTEGER PRIMARY KEY AUTOINCREMENT, judge_id INTEGER, battle_id INTEGER,
-    technique1 INTEGER, delivery1 INTEGER, content1 INTEGER,
-    technique2 INTEGER, delivery2 INTEGER, content2 INTEGER, created_at TEXT
-  );
 `);
-
-// ─── SEED DATA (CLEANED) ──────────────────────────────────────────────────────
-function seedIfEmpty() {
-  const userCount = db.prepare('SELECT COUNT(*) as c FROM users').get().c;
-  if (userCount > 0) return;
-  const hash = (pw) => bcrypt.hashSync(pw, 10);
-  const now = new Date().toISOString().slice(0, 10);
-
-  const insertUser = db.prepare(`INSERT INTO users (username,password,email,role,bio,avatar,joined) VALUES (?,?,?,?,?,?,?)`);
-  insertUser.run('admin', hash('Admin@FlowBars2026!'), 'admin@flowbars.ge', 'admin', 'Platform Administrator', '👑', now);
-  insertUser.run('mod1', hash('mod123'), 'mod@flowbars.ge', 'moderator', 'Community Moderator', '🛡️', now);
-  insertUser.run('designer1', hash('des123'), 'design@flowbars.ge', 'designer', 'Creative Designer', '🎨', now);
-  insertUser.run('judge1', hash('judge123'), 'judge@flowbars.ge', 'judge', 'Official Battle Judge', '⚖️', now);
-
-  const setSetting = db.prepare(`INSERT OR REPLACE INTO settings (key,value) VALUES (?,?)`);
-  [['siteName','Flow & Bars'], ['seasonText','Season 3'], ['maintenanceMode','false'], ['registrationOpen','true'], ['chatEnabled','true']].forEach(s => setSetting.run(...s));
-
-  db.prepare('INSERT OR REPLACE INTO design_config (key,value) VALUES (?,?)').run('config', JSON.stringify({
-    colors: { primary:'#FF2D55', accent:'#00D4FF', gold:'#FFD700', bg:'#070707', text:'#e8e8e8' },
-    heroTitle1: 'FLOW', heroTitle2: '& BARS',
-    heroSubtitle: "Georgia's #1 rap battle platform.",
-    footerText: "Georgia's #1 Rap Platform",
-    sections: { hero:true, statBar:true, battles:true, rappers:true, news:true },
-    cardStyle: 'rounded'
-  }));
-}
-seedIfEmpty();
 
 // ─── MIDDLEWARE ───────────────────────────────────────────────────────────────
 app.use(cors({ origin: '*', credentials: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// This fixes your ERR_ERL_PERMISSIVE_TRUST_PROXY error
 const limiter = rateLimit({ 
     windowMs: 15 * 60 * 1000, 
     max: 500, 
     standardHeaders: true, 
     legacyHeaders: false,
-    // ADD THIS LINE TO FIX THE CRASH
     validate: { trustProxy: false } 
 });
 app.use('/api', limiter);
@@ -132,12 +84,25 @@ function authMiddleware(req, res, next) {
   } catch { res.status(401).json({ error: 'Invalid token' }); }
 }
 
-const checkRole = (roles) => (req, res, next) => {
-  if (!req.user || !roles.includes(req.user.role)) return res.status(403).json({ error: 'Unauthorized' });
-  next();
-};
+// ─── AUTH ROUTES ─────────────────────────────────────────────────────────────
 
-// ─── FULL AUTH & PROFILE ──────────────────────────────────────────────────────
+// NEW: Fixed Registration Route
+app.post('/api/auth/register', (req, res) => {
+  const { username, password, email } = req.body;
+  if (!username || !password) return res.status(400).json({ error: 'Missing fields' });
+  
+  try {
+    const hashedPassword = bcrypt.hashSync(password, 10);
+    const now = new Date().toISOString().slice(0, 10);
+    const result = db.prepare(`INSERT INTO users (username, password, email, joined) VALUES (?, ?, ?, ?)`).run(username, hashedPassword, email, now);
+    
+    const token = jwt.sign({ id: result.lastInsertRowid, username, role: 'user' }, JWT_SECRET, { expiresIn: '7d' });
+    res.json({ token, user: { id: result.lastInsertRowid, username, role: 'user', avatar: '🎵' } });
+  } catch (err) {
+    res.status(400).json({ error: 'Username already exists' });
+  }
+});
+
 app.post('/api/auth/login', (req, res) => {
   const { username, password } = req.body;
   const user = db.prepare('SELECT * FROM users WHERE username=?').get(username);
@@ -154,16 +119,10 @@ app.get('/api/auth/me', authMiddleware, (req, res) => {
   res.json(req.user);
 });
 
-// ─── RAPPERS, BATTLES, NEWS (RESTORING ALL 700+ LINE LOGIC) ───────────────────
+// ─── CONTENT ROUTES ──────────────────────────────────────────────────────────
 app.get('/api/rappers', (req, res) => res.json(db.prepare('SELECT * FROM rappers ORDER BY pts DESC').all()));
 app.get('/api/battles', (req, res) => res.json(db.prepare('SELECT * FROM battles ORDER BY id DESC').all()));
 app.get('/api/news', (req, res) => res.json(db.prepare('SELECT * FROM news ORDER BY id DESC').all()));
-
-app.post('/api/rappers', authMiddleware, checkRole(['admin']), (req, res) => {
-  const { username, real_name, city, emoji, bio, style } = req.body;
-  const r = db.prepare(`INSERT INTO rappers (username,real_name,city,emoji,bio,style) VALUES (?,?,?,?,?,?)`).run(username, real_name, city, emoji, bio, style);
-  res.json({ id: r.lastInsertRowid });
-});
 
 app.post('/api/battles/:id/vote', authMiddleware, (req, res) => {
   const { side } = req.body;
@@ -176,15 +135,6 @@ app.post('/api/battles/:id/vote', authMiddleware, (req, res) => {
   } catch { res.status(400).json({ error: 'Already voted' }); }
 });
 
-// ─── JUDGING & SCORING (FULL SYSTEM) ──────────────────────────────────────────
-app.post('/api/battles/:id/score', authMiddleware, checkRole(['admin', 'judge']), (req, res) => {
-  const { technique1, delivery1, content1, technique2, delivery2, content2 } = req.body;
-  db.prepare(`INSERT INTO scores (judge_id, battle_id, technique1, delivery1, content1, technique2, delivery2, content2, created_at) VALUES (?,?,?,?,?,?,?,?,?)`)
-    .run(req.user.id, req.params.id, technique1, delivery1, content1, technique2, delivery2, content2, new Date().toISOString());
-  res.json({ success: true });
-});
-
-// ─── CHAT & REPORTS ───────────────────────────────────────────────────────────
 app.get('/api/chat', (req, res) => res.json(db.prepare('SELECT * FROM chat_messages ORDER BY id DESC LIMIT 100').all().reverse()));
 app.post('/api/chat', authMiddleware, (req, res) => {
   const { text } = req.body;
@@ -194,31 +144,16 @@ app.post('/api/chat', authMiddleware, (req, res) => {
   res.json({ success: true });
 });
 
-// ─── DESIGN & STATS ───────────────────────────────────────────────────────────
-app.get('/api/design', (req, res) => {
-  const row = db.prepare('SELECT value FROM design_config WHERE key=?').get('config');
-  res.json(JSON.parse(row?.value || '{}'));
-});
-
 app.get('/api/stats', (req, res) => {
   res.json({
     users: db.prepare('SELECT COUNT(*) as c FROM users').get().c,
     battles: db.prepare('SELECT COUNT(*) as c FROM battles').get().c,
     rappers: db.prepare('SELECT COUNT(*) as c FROM rappers').get().c,
-    pendingReports: db.prepare("SELECT COUNT(*) as c FROM reports WHERE status='pending'").get().c,
     chatMessages: db.prepare('SELECT COUNT(*) as c FROM chat_messages').get().c
   });
 });
 
-app.post('/api/admin/reset', authMiddleware, checkRole(['admin']), (req, res) => {
-  if (getClientIP(req) !== ADMIN_IP && getClientIP(req) !== '::1') return res.status(403).json({ error: 'Access denied' });
-  const tables = ['battles', 'rappers', 'news', 'chat_messages', 'reports', 'battle_comments', 'votes', 'follows', 'scores', 'banners'];
-  tables.forEach(t => db.prepare(`DELETE FROM ${t}`).run());
-  db.prepare('DELETE FROM users WHERE id > 1').run();
-  res.json({ success: true, message: "System Wiped." });
-});
-
-// ─── SPA FALLBACK & START ─────────────────────────────────────────────────────
+// ─── SPA FALLBACK ─────────────────────────────────────────────────────────────
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
 
 app.listen(PORT, () => {
